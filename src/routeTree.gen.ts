@@ -15,6 +15,8 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAulasRouteImport } from './routes/_authenticated/aulas'
 import { Route as AuthenticatedBibliaRouteImport } from './routes/_authenticated/biblia'
+import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
+import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated/lectio'
 import { Route as AuthenticatedReflexoesRouteImport } from './routes/_authenticated/reflexoes'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -46,6 +48,16 @@ const AuthenticatedBibliaRoute = AuthenticatedBibliaRouteImport.update({
   path: '/biblia',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLectioRoute = AuthenticatedLectioRouteImport.update({
+  id: '/lectio',
+  path: '/lectio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReflexoesRoute = AuthenticatedReflexoesRouteImport.update({
   id: '/reflexoes',
   path: '/reflexoes',
@@ -58,6 +70,8 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/aulas': typeof AuthenticatedAulasRoute
   '/biblia': typeof AuthenticatedBibliaRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
+  '/lectio': typeof AuthenticatedLectioRoute
   '/reflexoes': typeof AuthenticatedReflexoesRoute
 }
 export interface FileRoutesByTo {
@@ -65,6 +79,8 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/aulas': typeof AuthenticatedAulasRoute
   '/biblia': typeof AuthenticatedBibliaRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
+  '/lectio': typeof AuthenticatedLectioRoute
   '/reflexoes': typeof AuthenticatedReflexoesRoute
   '/': typeof AuthenticatedIndexRoute
 }
@@ -75,15 +91,32 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/aulas': typeof AuthenticatedAulasRoute
   '/_authenticated/biblia': typeof AuthenticatedBibliaRoute
+  '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
+  '/_authenticated/lectio': typeof AuthenticatedLectioRoute
   '/_authenticated/reflexoes': typeof AuthenticatedReflexoesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/reset-password' | '/aulas' | '/biblia' | '/reflexoes'
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/aulas'
+    | '/biblia'
+    | '/historico'
+    | '/lectio'
+    | '/reflexoes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/reset-password' | '/aulas' | '/biblia' | '/reflexoes' | '/'
+  to:
+    | '/auth'
+    | '/reset-password'
+    | '/aulas'
+    | '/biblia'
+    | '/historico'
+    | '/lectio'
+    | '/reflexoes'
+    | '/'
   id:
     | '__root__'
     | '/_authenticated'
@@ -91,6 +124,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/aulas'
     | '/_authenticated/biblia'
+    | '/_authenticated/historico'
+    | '/_authenticated/lectio'
     | '/_authenticated/reflexoes'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
@@ -145,6 +180,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBibliaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/historico': {
+      id: '/_authenticated/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof AuthenticatedHistoricoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lectio': {
+      id: '/_authenticated/lectio'
+      path: '/lectio'
+      fullPath: '/lectio'
+      preLoaderRoute: typeof AuthenticatedLectioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reflexoes': {
       id: '/_authenticated/reflexoes'
       path: '/reflexoes'
@@ -158,6 +207,8 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAulasRoute: typeof AuthenticatedAulasRoute
   AuthenticatedBibliaRoute: typeof AuthenticatedBibliaRoute
+  AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
+  AuthenticatedLectioRoute: typeof AuthenticatedLectioRoute
   AuthenticatedReflexoesRoute: typeof AuthenticatedReflexoesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -165,6 +216,8 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAulasRoute: AuthenticatedAulasRoute,
   AuthenticatedBibliaRoute: AuthenticatedBibliaRoute,
+  AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
+  AuthenticatedLectioRoute: AuthenticatedLectioRoute,
   AuthenticatedReflexoesRoute: AuthenticatedReflexoesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }

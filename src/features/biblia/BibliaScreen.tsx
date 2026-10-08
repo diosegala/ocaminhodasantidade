@@ -25,7 +25,7 @@ const LINK_SOURCE_LABEL: Record<string, string> = {
   lectio: "Lectio",
 };
 
-export function BibliaScreen() {
+export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
   const [view, setView] = useState<View>({ name: "home" });
   const [searchInput, setSearchInput] = useState("");
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -46,6 +46,17 @@ export function BibliaScreen() {
   });
 
   const books = booksQuery.data ?? [];
+
+  const appliedInitial = useRef(false);
+  useEffect(() => {
+    if (!initialRef || appliedInitial.current || books.length === 0) return;
+    appliedInitial.current = true;
+    const ref = parseReference(initialRef, books);
+    if (ref) {
+      setPendingRef(ref);
+      setView({ name: "read", book: ref.book, chapter: ref.chapter });
+    }
+  }, [initialRef, books]);
 
   async function runSearch() {
     const term = searchInput.trim();
