@@ -196,7 +196,7 @@ export function LectioScreen({ date }: { date: string }) {
           <p className="mt-1 font-serif text-lg text-muted-foreground">{STEPS[step].question}</p>
           <textarea
             value={(entry[STEPS[step].key] as string | null) ?? ""}
-            onChange={(e) => update({ [STEPS[step].key]: e.target.value } as Partial<Entry>)}
+            onChange={(e) => update({ [STEPS[step]!.key]: e.target.value } as Partial<Entry>)}
             rows={step === 0 ? 2 : 7}
             placeholder={step === 0 ? "Escreva ou selecione no texto e toque em Marcar" : "Escreva com as suas palavras (pode usar o microfone do teclado)"}
             className="mt-3 w-full rounded-xl border bg-card p-4 font-serif text-lg leading-relaxed outline-none focus:ring-2 focus:ring-ring"

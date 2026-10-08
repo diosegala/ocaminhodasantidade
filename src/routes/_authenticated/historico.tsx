@@ -23,7 +23,7 @@ function Historico() {
   const today = localToday();
   const [cursor, setCursor] = useState(() => {
     const [y, m] = today.split("-").map(Number);
-    return { y, m };
+    return { y: y ?? 2026, m: m ?? 1 };
   });
 
   const q = useQuery({

@@ -3,7 +3,7 @@ import { BibliaScreen } from "@/features/biblia/BibliaScreen";
 
 export const Route = createFileRoute("/_authenticated/biblia")({
   validateSearch: (s: Record<string, unknown>): { ref?: string } =>
-    typeof s.ref === "string" && s.ref ? { ref: s.ref } : {},
+    typeof s["ref"] === "string" && s["ref"] ? { ref: s["ref"] } : {},
   head: () => ({
     meta: [
       { title: "Bíblia — Caminho" },
@@ -17,5 +17,5 @@ export const Route = createFileRoute("/_authenticated/biblia")({
 
 function BibliaPage() {
   const { ref } = Route.useSearch();
-  return <BibliaScreen key={ref ?? ""} initialRef={ref} />;
+  return <BibliaScreen key={ref ?? ""} {...(ref ? { initialRef: ref } : {})} />;
 }
