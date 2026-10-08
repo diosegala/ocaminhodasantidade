@@ -172,7 +172,7 @@ export function LectioScreen({ date }: { date: string }) {
         />
       )}
 
-      {step < 4 && (
+      {step < 4 && STEPS[step] && (
         <div className="mt-6">
           {step === 0 && (
             <PassageText
@@ -376,7 +376,7 @@ function PassageText(props: {
   const bibleLink = parsed ? (
     <Link
       to="/biblia"
-      search={{ ref: props.reference ?? undefined }}
+      search={props.reference ? { ref: props.reference } : {}}
       className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
     >
       <BookOpen className="h-4 w-4" /> Ver na Bíblia Ave-Maria

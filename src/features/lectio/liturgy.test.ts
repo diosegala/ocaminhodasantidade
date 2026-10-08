@@ -25,7 +25,7 @@ describe("normalizeLiturgy", () => {
       "2026-10-08",
     );
     expect(lit?.readings).toHaveLength(1);
-    expect(lit?.readings[0].referencia).toBe("Jo 1,1");
+    expect(lit?.readings[0]?.referencia).toBe("Jo 1,1");
   });
 
   it("recusa resposta sem evangelho", () => {

@@ -4,8 +4,8 @@ export type Reading = {
   kind: ReadingKind;
   label: string;
   referencia: string;
-  titulo?: string;
-  refrao?: string;
+  titulo?: string | undefined;
+  refrao?: string | undefined;
   texto: string;
 };
 
@@ -37,12 +37,12 @@ const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 export function normalizeLiturgy(raw: unknown, date: string): Liturgy | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  const src = (r.leituras && typeof r.leituras === "object" ? r.leituras : r) as Record<string, unknown>;
+  const src = (r["leituras"] && typeof r["leituras"] === "object" ? r["leituras"] : r) as Record<string, unknown>;
   const map: [ReadingKind, unknown][] = [
-    ["primeira", src.primeiraLeitura],
-    ["salmo", src.salmo],
-    ["segunda", src.segundaLeitura],
-    ["evangelho", src.evangelho],
+    ["primeira", src["primeiraLeitura"]],
+    ["salmo", src["salmo"]],
+    ["segunda", src["segundaLeitura"]],
+    ["evangelho", src["evangelho"]],
   ];
   const readings: Reading[] = [];
   for (const [kind, value] of map) {
@@ -59,7 +59,7 @@ export function normalizeLiturgy(raw: unknown, date: string): Liturgy | null {
     });
   }
   if (!readings.some((x) => x.kind === "evangelho")) return null;
-  return { date, liturgia: str(r.liturgia), cor: str(r.cor), readings };
+  return { date, liturgia: str(r["liturgia"]), cor: str(r["cor"]), readings };
 }
 
 /** Dias seguidos com lectio concluída, terminando hoje ou ontem. */
