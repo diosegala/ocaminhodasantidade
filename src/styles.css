@@ -91,3 +91,15 @@
   }
   h1, h2, h3 { font-family: var(--font-serif); }
 }
+
+/* Destaques de versículo (etapa Bíblia) */
+.hl-amarelo { background-color: oklch(0.93 0.09 95); }
+.hl-verde { background-color: oklch(0.92 0.08 130); }
+.hl-rosa { background-color: oklch(0.92 0.07 20); }
+.dark .hl-amarelo { background-color: oklch(0.42 0.07 95); }
+.dark .hl-verde { background-color: oklch(0.40 0.06 130); }
+.dark .hl-rosa { background-color: oklch(0.40 0.05 20); }
+.hl-flash {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
