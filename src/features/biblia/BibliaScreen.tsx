@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Minus, Plus, Search, X } from "lucide-react";
-import { formatRef, parseReference, stripAccents, type BookLite, type ParsedReference } from "./reference";
+import { formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
 
 type View =
   | { name: "home" }
@@ -410,23 +410,16 @@ function ScrollToVerse({
   onDone: () => void;
   getEl: (verse: number) => HTMLParagraphElement | undefined;
 }) {
-  const done = useRef(false);
-  const lastPending = useRef<number | null>(null);
-
-  if (pendingVerse === null) {
-    done.current = false;
-    lastPending.current = null;
-  }
-
-  if (pendingVerse !== null && verses.length > 0 && !done.current) {
+  const ready = verses.length > 0;
+  useEffect(() => {
+    if (pendingVerse === null || !ready) return;
     const el = getEl(pendingVerse);
-    if (el) {
-      done.current = true;
-      el.scrollIntoView({ block: "center", behavior: "smooth" });
-      window.setTimeout(onDone, 2500);
-    }
-  }
-  lastPending.current = pendingVerse;
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    const timer = window.setTimeout(onDone, 2500);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingVerse, ready]);
   return null;
 }
 
