@@ -25,7 +25,10 @@ function ResetPassword() {
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
-    if (error) return toast.error("Não foi possível salvar. Abra o link do e-mail de novo.");
+    if (error) {
+      toast.error("Não foi possível salvar. Abra o link do e-mail de novo.");
+      return;
+    }
     toast.success("Senha atualizada.");
     navigate({ to: "/" });
   }
