@@ -88,7 +88,7 @@ export function parseReference(input: string, books: BookLite[]): ParsedReferenc
     /^([1-3]?\s?[a-z]+)\.?\s*(\d{1,3})(?:\s*[,;:.]\s*(\d{1,3}))?(?:\s*(?:-|\u2013|a)\s*(\d{1,3}))?$/,
   );
   if (!match) return null;
-  const bookKey = match[1].replace(/\s+/g, "").replace(/\.$/, "");
+  const bookKey = match[1]!.replace(/\s+/g, "").replace(/\.$/, "");
   const index = buildBookIndex(books);
   const book = index.get(bookKey);
   if (!book) return null;
