@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyPage } from "@/components/app/AppShell";
+import { GraduationCap } from "lucide-react";
+import { EmptyState, ScreenHeader } from "@/components/app/ui";
 
 export const Route = createFileRoute("/_authenticated/aulas")({
   head: () => ({
@@ -11,6 +12,11 @@ export const Route = createFileRoute("/_authenticated/aulas")({
     ],
   }),
   component: () => (
-    <EmptyPage title="Aulas" intro="Nenhuma aula ainda. Logo você poderá registrar cada encontro, com transcrição, fotos e dúvidas." />
+    <section>
+      <ScreenHeader title="Aulas" />
+      <EmptyState icon={GraduationCap} title="Nenhuma aula ainda">
+        Logo você poderá registrar cada encontro, com transcrição, fotos e dúvidas.
+      </EmptyState>
+    </section>
   ),
 });

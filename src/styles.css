@@ -5,8 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-serif: "Literata", Georgia, serif;
-  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  /* Fontes do sistema: SF Pro e New York no iPhone, sem download e funcionando offline. */
+  --font-serif: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+  --font-sans: system-ui, -apple-system, "SF Pro Text", Roboto, "Segoe UI", sans-serif;
+  --shadow-card: var(--shadow-card);
+  --color-glass: var(--glass);
+  --color-lit-verde: var(--lit-verde);
+  --color-lit-roxo: var(--lit-roxo);
+  --color-lit-branco: var(--lit-branco);
+  --color-lit-vermelho: var(--lit-vermelho);
+  --color-lit-rosa: var(--lit-rosa);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -55,6 +63,14 @@
   --border: oklch(0.89 0.015 80);
   --input: oklch(0.89 0.015 80);
   --ring: oklch(0.48 0.07 125);
+  --shadow-card: 0 1px 2px oklch(0.3 0.02 60 / 0.05), 0 6px 20px oklch(0.3 0.02 60 / 0.07);
+  --glass: oklch(0.99 0.008 85 / 0.72);
+  /* Cores litúrgicas (o branco das festas aparece como dourado suave). */
+  --lit-verde: oklch(0.56 0.11 145);
+  --lit-roxo: oklch(0.46 0.13 300);
+  --lit-branco: oklch(0.78 0.09 85);
+  --lit-vermelho: oklch(0.53 0.17 25);
+  --lit-rosa: oklch(0.72 0.1 0);
 }
 
 .dark {
@@ -77,6 +93,13 @@
   --border: oklch(0.33 0.012 60);
   --input: oklch(0.33 0.012 60);
   --ring: oklch(0.72 0.08 120);
+  --shadow-card: 0 0 0 1px var(--border);
+  --glass: oklch(0.26 0.012 60 / 0.72);
+  --lit-verde: oklch(0.68 0.11 145);
+  --lit-roxo: oklch(0.66 0.12 300);
+  --lit-branco: oklch(0.84 0.08 85);
+  --lit-vermelho: oklch(0.66 0.15 25);
+  --lit-rosa: oklch(0.78 0.09 0);
 }
 
 @layer base {
@@ -87,9 +110,48 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 1.0625rem;
+    -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3 { font-family: var(--font-serif); }
+}
+
+/* Escala de tipos no estilo do iPhone */
+@utility title-large {
+  font-size: 2.125rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+@utility title {
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted-foreground);
+}
+@utility reading {
+  font-family: var(--font-serif);
+  font-size: 1.1875rem;
+  line-height: 1.65;
+}
+/* Retorno visual ao tocar */
+@utility pressable {
+  transition: transform 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Transição entre telas: a barra inferior fica parada enquanto o conteúdo troca. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
 }
 
 /* Destaques de versículo (etapa Bíblia) */

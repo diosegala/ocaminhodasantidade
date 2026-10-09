@@ -1,8 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordInput } from "@/components/app/PasswordInput";
+import { ScreenHeader } from "@/components/app/ui";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/senha")({
   head: () => ({
@@ -60,18 +62,16 @@ function SenhaPage() {
 
   return (
     <section>
-      {!mustChange && (
-        <Link to="/conta" className="flex items-center gap-1 text-sm text-primary">
-          <span aria-hidden>‹</span> Conta
-        </Link>
-      )}
-      <h1 className="mt-4 text-3xl">{mustChange ? "Crie a sua senha" : "Alterar senha"}</h1>
+      <ScreenHeader
+        title={mustChange ? "Crie a sua senha" : "Alterar senha"}
+        {...(mustChange ? { action: <span /> } : { back: { label: "Conta", to: "/conta" } })}
+      />
       {mustChange && (
-        <p className="mt-3 font-serif text-lg leading-relaxed text-muted-foreground">
+        <p className="reading -mt-2 text-muted-foreground">
           Você entrou com uma senha temporária. Escolha uma senha só sua para continuar.
         </p>
       )}
-      <form onSubmit={submit} className="mt-6 space-y-4">
+      <form onSubmit={submit} className="mt-6 space-y-3">
         <PasswordInput
           required
           minLength={8}
@@ -88,12 +88,9 @@ function SenhaPage() {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
         />
-        <button
-          disabled={busy}
-          className="w-full rounded-xl bg-primary py-3.5 font-medium text-primary-foreground disabled:opacity-60"
-        >
+        <Button type="submit" size="lg" disabled={busy} className="!mt-5">
           {busy ? "Aguarde…" : "Salvar senha"}
-        </button>
+        </Button>
       </form>
     </section>
   );

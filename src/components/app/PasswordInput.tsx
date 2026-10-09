@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type InputHTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 
 /** Campo de senha com botão para mostrar ou esconder o que foi digitado. */
 export function PasswordInput({
@@ -16,7 +17,10 @@ export function PasswordInput({
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
-        className={`w-full rounded-xl border bg-card py-3.5 pl-4 pr-12 text-base outline-none focus:ring-2 focus:ring-ring ${className}`}
+        className={cn(
+          "h-[52px] w-full rounded-xl bg-card pl-4 pr-12 text-base shadow-card outline-none focus:ring-2 focus:ring-ring",
+          className,
+        )}
       />
       <button
         type="button"

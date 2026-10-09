@@ -1,7 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, CircleUser, CloudOff, GraduationCap, Moon, NotebookPen, Search, Sun, Sunrise } from "lucide-react";
-import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { BookOpen, CloudOff, GraduationCap, NotebookPen, Sunrise } from "lucide-react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { booksQueryOptions } from "@/features/biblia/queries";
 
 const tabs = [
@@ -12,7 +12,17 @@ const tabs = [
 ] as const;
 
 // Telas carregadas com antecedência, para abrirem mesmo sem internet.
-const WARM_ROUTES = ["/", "/aulas", "/biblia", "/biblia/destaques", "/reflexoes", "/lectio", "/historico", "/conta", "/senha"] as const;
+const WARM_ROUTES = [
+  "/",
+  "/aulas",
+  "/biblia",
+  "/biblia/destaques",
+  "/reflexoes",
+  "/lectio",
+  "/historico",
+  "/conta",
+  "/senha",
+] as const;
 
 function subscribeOnline(cb: () => void) {
   window.addEventListener("online", cb);
@@ -24,16 +34,17 @@ function subscribeOnline(cb: () => void) {
 }
 
 export function useOnline() {
-  return useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribeOnline,
+    () => navigator.onLine,
+    () => true,
+  );
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const online = useOnline();
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);
 
   useEffect(() => {
     if (!online) return;
@@ -44,57 +55,32 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(id);
   }, [online, router, queryClient]);
 
-  function toggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  }
-
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col">
-      <header className="sticky top-0 z-10 bg-background/90 px-4 pb-3 pt-[max(env(safe-area-inset-top),0.75rem)] backdrop-blur">
-        <div className="flex items-center gap-2">
-          <label className="flex flex-1 items-center gap-2 rounded-full border bg-card px-4 py-2.5">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Buscar em tudo"
-              className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
-            />
-          </label>
-          <button onClick={toggleTheme} aria-label="Mudar tema" className="rounded-full p-2.5 text-muted-foreground hover:bg-secondary">
-            {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
-          <Link
-            to="/conta"
-            aria-label="Minha conta"
-            className="rounded-full p-2.5 text-muted-foreground hover:bg-secondary data-[status=active]:bg-accent data-[status=active]:text-primary"
-          >
-            <CircleUser className="h-5 w-5" />
-          </Link>
-        </div>
-        {!online && (
-          <p className="mt-2 flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-sm text-muted-foreground">
-            <CloudOff className="h-4 w-4 shrink-0" /> Sem internet · mostrando o que já está no aparelho
-          </p>
-        )}
-      </header>
+      {!online && (
+        <p className="fixed inset-x-0 top-[max(env(safe-area-inset-top),0.5rem)] z-20 mx-auto flex w-fit items-center gap-2 rounded-full bg-glass px-4 py-1.5 text-sm text-muted-foreground shadow-card backdrop-blur-xl backdrop-saturate-150">
+          <CloudOff className="h-4 w-4 shrink-0" /> Sem internet · mostrando o que está no aparelho
+        </p>
+      )}
 
-      <main className="flex-1 px-5 pb-28 pt-4">{children}</main>
+      {/* Espaço de baixo: altura da barra flutuante + margem + área do gesto do iPhone. */}
+      <main className="flex-1 px-5 pb-[calc(max(env(safe-area-inset-bottom),0.75rem)+6rem)] pt-[max(env(safe-area-inset-top),0.75rem)]">
+        {children}
+      </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-        <ul className="mx-auto flex max-w-xl">
+      <nav
+        style={{ viewTransitionName: "tabbar" }}
+        className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-10 mx-auto w-[calc(100%-2rem)] max-w-md rounded-full bg-glass p-1.5 shadow-card backdrop-blur-xl backdrop-saturate-150"
+      >
+        <ul className="flex">
           {tabs.map(({ to, label, icon: Icon }) => (
             <li key={to} className="flex-1">
               <Link
                 to={to}
                 activeOptions={{ exact: to === "/" }}
-                className="group flex flex-col items-center gap-0.5 pb-2 pt-2 text-xs text-muted-foreground data-[status=active]:font-semibold data-[status=active]:text-primary"
+                className="pressable flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] font-medium text-muted-foreground transition-colors data-[status=active]:bg-primary/12 data-[status=active]:font-semibold data-[status=active]:text-primary"
               >
-                <span className="flex h-8 w-14 items-center justify-center rounded-full transition-colors group-data-[status=active]:bg-accent">
-                  <Icon className="h-6 w-6" />
-                </span>
+                <Icon className="h-6 w-6" strokeWidth={1.8} />
                 {label}
               </Link>
             </li>
@@ -102,15 +88,5 @@ export function AppShell({ children }: { children: ReactNode }) {
         </ul>
       </nav>
     </div>
-  );
-}
-
-export function EmptyPage({ title, intro, children }: { title: string; intro: string; children?: ReactNode }) {
-  return (
-    <section>
-      <h1 className="text-3xl">{title}</h1>
-      <p className="mt-3 font-serif text-lg leading-relaxed text-muted-foreground">{intro}</p>
-      {children}
-    </section>
   );
 }

@@ -1,8 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, KeyRound, LogOut, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { KeyRound, LogOut, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { idbPersister } from "@/lib/query-persister";
+import { getThemeMode, setThemeMode, type ThemeMode } from "@/lib/theme";
+import { ListGroup, Row, rowClass, ScreenHeader, SegmentedControl } from "@/components/app/ui";
 
 export const Route = createFileRoute("/_authenticated/conta")({
   head: () => ({
@@ -16,9 +19,18 @@ export const Route = createFileRoute("/_authenticated/conta")({
   component: ContaPage,
 });
 
+const THEMES: { value: ThemeMode; label: string }[] = [
+  { value: "system", label: "Automático" },
+  { value: "light", label: "Claro" },
+  { value: "dark", label: "Escuro" },
+];
+
 function ContaPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [theme, setTheme] = useState<ThemeMode>("system");
+
+  useEffect(() => setTheme(getThemeMode()), []);
 
   const me = useQuery({
     queryKey: ["me"],
@@ -42,42 +54,43 @@ function ContaPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  const row = "flex w-full items-center gap-3 px-4 py-4 text-left";
-
   return (
     <section>
-      <h1 className="text-3xl">Conta</h1>
-      {me.data && (
-        <p className="mt-2 font-serif text-lg text-muted-foreground">
-          {me.data.name ? `${me.data.name} · ` : ""}
-          {me.data.email}
-        </p>
-      )}
+      <ScreenHeader
+        title="Conta"
+        subtitle={me.data ? [me.data.name, me.data.email].filter(Boolean).join(" · ") : undefined}
+        back={{ label: "Voltar", to: "/" }}
+      />
 
-      <ul className="mt-6 divide-y rounded-2xl border bg-card">
-        <li>
-          <Link to="/senha" className={row}>
-            <KeyRound className="h-5 w-5 text-primary" />
-            <span className="flex-1">Alterar senha</span>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-          </Link>
-        </li>
+      <section>
+        <h2 className="eyebrow mb-2 px-4">Aparência</h2>
+        <SegmentedControl
+          options={THEMES}
+          value={theme}
+          onChange={(mode) => {
+            setTheme(mode);
+            setThemeMode(mode);
+          }}
+        />
+      </section>
+
+      <ListGroup className="mt-7">
+        <Link to="/senha" className={rowClass}>
+          <Row icon={KeyRound} title="Alterar senha" chevron />
+        </Link>
         {me.data?.isOwner && (
-          <li>
-            <Link to="/pessoas" className={row}>
-              <Users className="h-5 w-5 text-primary" />
-              <span className="flex-1">Pessoas e acessos</span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </Link>
-          </li>
+          <Link to="/pessoas" className={rowClass}>
+            <Row icon={Users} title="Pessoas e acessos" chevron />
+          </Link>
         )}
-        <li>
-          <button onClick={() => void signOut()} className={row}>
-            <LogOut className="h-5 w-5 text-primary" />
-            <span className="flex-1">Sair</span>
-          </button>
-        </li>
-      </ul>
+      </ListGroup>
+
+      <ListGroup className="mt-7">
+        <button onClick={() => void signOut()} className={`${rowClass} text-destructive`}>
+          <LogOut className="h-5 w-5 shrink-0" />
+          <span className="flex-1">Sair</span>
+        </button>
+      </ListGroup>
     </section>
   );
 }

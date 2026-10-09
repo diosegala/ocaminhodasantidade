@@ -7,6 +7,8 @@ import { parseReference, type BookLite } from "@/features/biblia/reference";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { getLiturgy } from "./liturgy.functions";
 import type { Reading } from "./liturgy";
+import { Card, Chip, ScreenHeader } from "@/components/app/ui";
+import { Button } from "@/components/ui/button";
 
 type Entry = {
   id?: string;
@@ -164,20 +166,26 @@ export function LectioScreen({ date }: { date: string }) {
   }
 
   if (entryQ.isLoading || liturgyQ.isLoading || !entry) {
-    return <p className="font-serif text-lg text-muted-foreground">Preparando a leitura…</p>;
+    return (
+      <section>
+        <ScreenHeader title="Lectio divina" back={{ label: "Hoje", to: "/" }} />
+        <p className="reading text-muted-foreground">Preparando a leitura…</p>
+      </section>
+    );
   }
 
   const dateLabel = new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <section>
-      <div className="flex items-baseline justify-between gap-3">
-        <h1 className="text-3xl">Lectio divina</h1>
-        <SaveBadge state={saveState} />
-      </div>
-      <p className="mt-1 text-sm capitalize text-muted-foreground">{dateLabel}</p>
+      <ScreenHeader
+        title="Lectio divina"
+        subtitle={dateLabel}
+        back={{ label: "Hoje", to: "/" }}
+        action={<SaveBadge state={saveState} />}
+      />
 
-      {step < 4 && <StepDots step={step} onPick={setStep} />}
+      {step < 4 && <StepProgress step={step} onPick={setStep} />}
 
       {step === 0 && (
         <TextChooser
@@ -191,82 +199,80 @@ export function LectioScreen({ date }: { date: string }) {
       )}
 
       {step < 4 && STEPS[step] && (
-        <div className="mt-6">
+        <div className="mt-5">
           {step === 0 && (
-            <PassageText
-              reading={liturgyReading}
-              reference={reference}
-              books={books}
-              mark={entry.reading_mark ?? ""}
-              onMark={(m) => update({ reading_mark: m })}
-            />
+            <Card>
+              <PassageText
+                reading={liturgyReading}
+                reference={reference}
+                books={books}
+                mark={entry.reading_mark ?? ""}
+                onMark={(m) => update({ reading_mark: m })}
+              />
+            </Card>
           )}
           {step > 0 && reference && (
-            <details className="mb-5 rounded-xl border bg-card px-4 py-3">
-              <summary className="cursor-pointer text-sm text-muted-foreground">Reler o texto · {reference}</summary>
+            <details className="rounded-[20px] bg-card px-5 py-4 shadow-card">
+              <summary className="cursor-pointer text-[15px] text-primary">Reler o texto · {reference}</summary>
               <div className="mt-3">
                 <PassageText reading={liturgyReading} reference={reference} books={books} mark={entry.reading_mark ?? ""} />
               </div>
             </details>
           )}
 
-          <h2 className="mt-6 text-2xl">{STEPS[step].title}</h2>
-          <p className="mt-1 font-serif text-lg text-muted-foreground">{STEPS[step].question}</p>
+          <p className="eyebrow mt-7">
+            Passo {step + 1} de 4 · {STEPS[step].title}
+          </p>
+          <h2 className="title mt-1">{STEPS[step].question}</h2>
           <textarea
             value={(entry[STEPS[step].key] as string | null) ?? ""}
             onChange={(e) => update({ [STEPS[step]!.key]: e.target.value } as Partial<Entry>)}
             rows={step === 0 ? 2 : 7}
             placeholder={step === 0 ? "Escreva ou selecione no texto e toque em Marcar" : "Escreva com as suas palavras (pode usar o microfone do teclado)"}
-            className="mt-3 w-full rounded-xl border bg-card p-4 font-serif text-lg leading-relaxed outline-none focus:ring-2 focus:ring-ring"
+            className="reading mt-3 w-full rounded-[20px] bg-card p-4 shadow-card outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-ring"
           />
 
           <div className="mt-5 flex gap-3">
             {step > 0 && (
-              <button onClick={() => setStep(step - 1)} className="flex items-center gap-2 rounded-2xl border px-5 py-4">
-                <ArrowLeft className="h-5 w-5" /> Voltar
-              </button>
+              <Button variant="secondary" size="lg" className="w-auto" onClick={() => setStep(step - 1)} aria-label="Passo anterior">
+                <ArrowLeft />
+              </Button>
             )}
             {step < 3 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-lg text-primary-foreground"
-              >
-                Próximo passo <ArrowRight className="h-5 w-5" />
-              </button>
+              <Button size="lg" className="flex-1" onClick={() => setStep(step + 1)}>
+                Próximo passo <ArrowRight />
+              </Button>
             ) : (
-              <button
-                onClick={finish}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-lg text-primary-foreground"
-              >
-                <Check className="h-5 w-5" /> Concluir a lectio
-              </button>
+              <Button size="lg" className="flex-1" onClick={finish}>
+                <Check /> Concluir a lectio
+              </Button>
             )}
           </div>
         </div>
       )}
 
       {step === 4 && (
-        <div className="mt-6 space-y-5">
-          <div className="rounded-2xl border bg-card p-5">
-            <p className="text-sm text-muted-foreground">Lectio concluída · {reference}</p>
+        <div className="space-y-5">
+          <Card>
+            <p className="eyebrow">Lectio concluída · {reference}</p>
             {STEPS.map((s) =>
               entry[s.key] ? (
-                <div key={s.key} className="mt-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">{s.title}</h3>
-                  <p className="mt-1 whitespace-pre-wrap font-serif text-lg leading-relaxed">{entry[s.key]}</p>
+                <div key={s.key} className="mt-5">
+                  <h3 className="text-[15px] font-semibold text-primary">{s.title}</h3>
+                  <p className="reading mt-1 whitespace-pre-wrap">{entry[s.key]}</p>
                 </div>
               ) : null,
             )}
-          </div>
-          <button onClick={() => setStep(0)} className="w-full rounded-2xl border px-5 py-4">
+          </Card>
+          <Button variant="secondary" size="lg" onClick={() => setStep(0)}>
             Rever ou editar os passos
-          </button>
-          <button disabled className="w-full rounded-2xl border px-5 py-4 text-muted-foreground opacity-60">
+          </Button>
+          <Button variant="secondary" size="lg" disabled>
             Ver apoio (chega na próxima etapa)
-          </button>
-          <Link to="/historico" className="block text-center text-primary underline-offset-4 hover:underline">
-            Ver histórico
-          </Link>
+          </Button>
+          <Button asChild variant="link" className="w-full text-[17px]">
+            <Link to="/historico">Ver histórico</Link>
+          </Button>
         </div>
       )}
     </section>
@@ -281,19 +287,16 @@ function SaveBadge({ state }: { state: string }) {
     error: "Não salvou — verifique a internet",
     offline: "Guardado no aparelho",
   }[state];
-  return <span className="text-xs text-muted-foreground">{label}</span>;
+  return <span className="text-[13px] text-muted-foreground">{label}</span>;
 }
 
-function StepDots({ step, onPick }: { step: number; onPick: (n: number) => void }) {
+function StepProgress({ step, onPick }: { step: number; onPick: (n: number) => void }) {
   return (
-    <ol className="mt-5 flex gap-2">
+    <ol className="flex gap-1.5">
       {STEPS.map((s, i) => (
         <li key={s.key} className="flex-1">
-          <button
-            onClick={() => onPick(i)}
-            className={`w-full border-t-4 pt-1 text-left text-xs ${i <= step ? "border-primary text-foreground" : "border-border text-muted-foreground"}`}
-          >
-            {i + 1}. {s.title}
+          <button onClick={() => onPick(i)} aria-label={`Ir para ${s.title}`} className="block w-full py-2">
+            <span className={`block h-1.5 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-secondary"}`} />
           </button>
         </li>
       ))}
@@ -311,27 +314,23 @@ function TextChooser(props: {
 }) {
   const [manual, setManual] = useState("");
   return (
-    <div className="mt-5 space-y-3">
+    <div className="mt-3 space-y-3">
       {props.fromCacheOfDate && (
-        <p className="rounded-xl bg-secondary p-3 text-sm">
+        <p className="rounded-2xl bg-secondary p-4 text-[15px]">
           Não consegui buscar a liturgia de hoje. Mostrando a do dia {props.fromCacheOfDate.split("-").reverse().join("/")}. Você pode escolher outro trecho abaixo.
         </p>
       )}
       {props.liturgyFailed && (
-        <p className="rounded-xl bg-secondary p-3 text-sm">
+        <p className="rounded-2xl bg-secondary p-4 text-[15px]">
           Não consegui buscar a liturgia agora. Escolha um trecho da Bíblia para a sua lectio.
         </p>
       )}
       {props.readings.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {props.readings.map((r) => (
-            <button
-              key={r.kind}
-              onClick={() => props.onReference(r.referencia)}
-              className={`rounded-full border px-3 py-1.5 text-sm ${props.reference === r.referencia ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}
-            >
+            <Chip key={r.kind} active={props.reference === r.referencia} onClick={() => props.onReference(r.referencia)}>
               {r.label}
-            </button>
+            </Chip>
           ))}
         </div>
       )}
@@ -346,9 +345,11 @@ function TextChooser(props: {
           value={manual}
           onChange={(e) => setManual(e.target.value)}
           placeholder="Outro trecho, ex.: Jo 15,1-8"
-          className="flex-1 rounded-xl border bg-card px-4 py-2.5 outline-none"
+          className="h-11 flex-1 rounded-xl bg-card px-4 text-base shadow-card outline-none focus:ring-2 focus:ring-ring"
         />
-        <button className="rounded-xl border px-4">Usar</button>
+        <Button type="submit" variant="secondary" size="md">
+          Usar
+        </Button>
       </form>
     </div>
   );
@@ -401,9 +402,9 @@ function PassageText(props: {
     <Link
       to="/biblia"
       search={props.reference ? { ref: props.reference } : {}}
-      className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+      className="inline-flex items-center gap-1.5 text-[15px] text-primary"
     >
-      <BookOpen className="h-4 w-4" /> Ver na Bíblia Ave-Maria
+      <BookOpen className="h-4 w-4" /> Ver na Bíblia
     </Link>
   ) : null;
 
@@ -411,9 +412,9 @@ function PassageText(props: {
   if (props.reading) {
     body = (
       <>
-        {props.reading.titulo && <p className="text-sm italic text-muted-foreground">{props.reading.titulo}</p>}
-        {props.reading.refrao && <p className="mt-2 font-serif font-semibold">{props.reading.refrao}</p>}
-        <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed">{highlight(props.reading.texto, props.mark)}</p>
+        {props.reading.titulo && <p className="text-[15px] italic text-muted-foreground">{props.reading.titulo}</p>}
+        {props.reading.refrao && <p className="reading mt-2 font-semibold">{props.reading.refrao}</p>}
+        <p className="reading mt-3 whitespace-pre-wrap">{highlight(props.reading.texto, props.mark)}</p>
         <p className="mt-3 text-xs text-muted-foreground">Texto da liturgia (CNBB), como foi publicado.</p>
       </>
     );
@@ -425,7 +426,7 @@ function PassageText(props: {
     body = <p className="text-muted-foreground">Não encontrei esse trecho na Bíblia.</p>;
   } else {
     body = (
-      <p className="font-serif text-lg leading-relaxed">
+      <p className="reading">
         {highlight(versesQ.data.map((v) => `${v.verse} ${v.text}`).join(" "), props.mark)}
       </p>
     );
@@ -433,14 +434,14 @@ function PassageText(props: {
 
   return (
     <article>
-      <h2 className="font-serif text-xl">{props.reference}</h2>
+      <h2 className="eyebrow">{props.reference}</h2>
       <div className="mt-2">{body}</div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         {bibleLink}
         {props.onMark && (
-          <button onClick={markSelection} className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm">
-            <Highlighter className="h-4 w-4" /> Marcar seleção
-          </button>
+          <Button variant="secondary" size="sm" className="h-9 rounded-full px-3.5 text-[15px]" onClick={markSelection}>
+            <Highlighter /> Marcar seleção
+          </Button>
         )}
       </div>
     </article>

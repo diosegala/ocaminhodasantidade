@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EmptyPage } from "@/components/app/AppShell";
+import { NotebookPen } from "lucide-react";
+import { EmptyState, ScreenHeader } from "@/components/app/ui";
 
 export const Route = createFileRoute("/_authenticated/reflexoes")({
   head: () => ({
@@ -11,6 +12,11 @@ export const Route = createFileRoute("/_authenticated/reflexoes")({
     ],
   }),
   component: () => (
-    <EmptyPage title="Reflexões" intro="Nenhuma reflexão ainda. Aqui ficarão suas notas, ligadas aos versículos e às aulas." />
+    <section>
+      <ScreenHeader title="Reflexões" />
+      <EmptyState icon={NotebookPen} title="Nenhuma reflexão ainda">
+        Aqui ficarão suas notas, ligadas aos versículos e às aulas.
+      </EmptyState>
+    </section>
   ),
 });

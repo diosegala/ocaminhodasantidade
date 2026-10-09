@@ -3,14 +3,21 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordInput } from "@/components/app/PasswordInput";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Entrar — Caminho" },
-      { name: "description", content: "Entre no Caminho para continuar seus estudos e sua lectio." },
+      {
+        name: "description",
+        content: "Entre no Caminho para continuar seus estudos e sua lectio.",
+      },
       { property: "og:title", content: "Entrar — Caminho" },
-      { property: "og:description", content: "Entre no Caminho para continuar seus estudos e sua lectio." },
+      {
+        property: "og:description",
+        content: "Entre no Caminho para continuar seus estudos e sua lectio.",
+      },
     ],
   }),
   component: AuthPage,
@@ -18,7 +25,8 @@ export const Route = createFileRoute("/auth")({
 
 function friendly(msg: string) {
   if (msg.includes("Invalid login")) return "E-mail ou senha incorretos.";
-  if (msg.toLowerCase().includes("fetch")) return "Sem conexão. Verifique a internet e tente de novo.";
+  if (msg.toLowerCase().includes("fetch"))
+    return "Sem conexão. Verifique a internet e tente de novo.";
   return msg;
 }
 
@@ -43,13 +51,19 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
+    <div className="flex min-h-screen items-center justify-center px-6 py-[max(env(safe-area-inset-top),2rem)]">
       <div className="w-full max-w-sm">
-        <h1 className="text-4xl">Caminho</h1>
-        <p className="mt-2 font-serif text-muted-foreground">Catequese, Palavra e oração.</p>
+        <div className="flex flex-col items-center text-center">
+          <img
+            src="/apple-touch-icon.png"
+            alt=""
+            className="h-20 w-20 rounded-[22px] shadow-card"
+          />
+          <h1 className="title-large mt-5">Caminho</h1>
+          <p className="reading mt-1 text-muted-foreground">Catequese, Palavra e oração.</p>
+        </div>
 
-        <form onSubmit={submit} className="mt-10 space-y-4">
-          <h2 className="text-xl">Entrar</h2>
+        <form onSubmit={submit} className="mt-10 space-y-3">
           <input
             type="email"
             required
@@ -58,7 +72,7 @@ function AuthPage() {
             placeholder="E-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border bg-card px-4 py-3.5 text-base outline-none focus:ring-2 focus:ring-ring"
+            className="h-[52px] w-full rounded-xl bg-card px-4 text-base shadow-card outline-none focus:ring-2 focus:ring-ring"
           />
           <PasswordInput
             required
@@ -67,22 +81,19 @@ function AuthPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button
-            disabled={busy}
-            className="w-full rounded-xl bg-primary py-3.5 font-medium text-primary-foreground disabled:opacity-60"
-          >
+          <Button type="submit" size="lg" disabled={busy} className="!mt-5">
             {busy ? "Aguarde…" : "Entrar"}
-          </button>
+          </Button>
         </form>
 
-        <div className="mt-6 text-sm text-muted-foreground">
+        <div className="mt-6 text-center">
           {forgot ? (
-            <p className="rounded-xl bg-secondary p-4 font-serif text-base leading-relaxed">
-              Peça a quem te convidou para redefinir a sua senha. Você vai receber uma senha temporária e, ao entrar,
-              cria uma nova.
+            <p className="rounded-2xl bg-secondary p-4 text-left text-[15px] leading-relaxed text-muted-foreground">
+              Peça a quem te convidou para redefinir a sua senha. Você vai receber uma senha
+              temporária e, ao entrar, cria uma nova.
             </p>
           ) : (
-            <button onClick={() => setForgot(true)} className="underline">
+            <button onClick={() => setForgot(true)} className="text-[15px] text-primary">
               Esqueci minha senha
             </button>
           )}

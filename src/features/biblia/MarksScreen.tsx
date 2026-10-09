@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Chip, ScreenHeader } from "@/components/app/ui";
 import { HIGHLIGHTS } from "./BibliaScreen";
 import { formatRef } from "./reference";
 
@@ -65,49 +66,44 @@ export function MarksScreen() {
 
   return (
     <section>
-      <Link to="/biblia" className="flex items-center gap-1 text-sm text-primary">
-        <span aria-hidden>‹</span> Bíblia
-      </Link>
-      <h1 className="mt-4 text-3xl">Destaques e notas</h1>
+      <ScreenHeader
+        title="Destaques e notas"
+        subtitle={q.isSuccess ? `${all.length} ${all.length === 1 ? "versículo" : "versículos"}` : undefined}
+        back={{ label: "Bíblia", to: "/biblia" }}
+      />
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
         {chips.map((c) => (
-          <button
-            key={c.value}
-            onClick={() => setFilter(c.value)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm ${filter === c.value ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}
-          >
-            {c.className && <span className={`h-3 w-3 rounded-full border ${c.className}`} />}
-            {c.label}
-          </button>
+          <Chip key={c.value} active={filter === c.value} onClick={() => setFilter(c.value)}>
+            {c.className && <span className={`h-3 w-3 rounded-full ${c.className}`} />}
+            <span className="whitespace-nowrap">{c.label}</span>
+          </Chip>
         ))}
       </div>
 
       {q.isLoading && <p className="mt-6 text-muted-foreground">Carregando…</p>}
       {q.isError && <p className="mt-6 text-muted-foreground">Não consegui carregar agora. Tente de novo.</p>}
       {q.isSuccess && items.length === 0 && (
-        <p className="mt-6 font-serif text-lg text-muted-foreground">
+        <p className="reading mt-6 text-muted-foreground">
           {all.length === 0
             ? "Você ainda não destacou nem anotou nenhum versículo. Na Bíblia, toque num versículo para começar."
             : "Nada com este filtro."}
         </p>
       )}
 
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-5 space-y-3">
         {items.map((m) => {
           const ref = formatRef(m.book, m.chapter, m.verse);
           const hl = HIGHLIGHTS.find((h) => h.value === m.highlight);
           return (
             <li key={key(m.book_id, m.chapter, m.verse)}>
-              <Link to="/biblia" search={{ ref }} className="block rounded-2xl border bg-card p-4">
-                <span className="text-sm font-semibold text-primary">
+              <Link to="/biblia" search={{ ref }} className="pressable block rounded-[20px] bg-card p-5 shadow-card">
+                <span className="eyebrow">
                   {m.book.name} {m.chapter},{m.verse}
                 </span>
-                <p className={`mt-1 rounded-md px-1 py-0.5 font-serif text-lg leading-relaxed ${hl?.className ?? ""}`}>
-                  {m.text}
-                </p>
+                <p className={`reading mt-2 rounded-lg px-1.5 py-0.5 ${hl?.className ?? ""}`}>{m.text}</p>
                 {m.note && (
-                  <p className="mt-2 whitespace-pre-wrap border-l-2 border-primary pl-3 font-serif text-muted-foreground">
+                  <p className="mt-3 whitespace-pre-wrap border-l-2 border-primary pl-3 text-base text-muted-foreground">
                     {m.note}
                   </p>
                 )}

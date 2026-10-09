@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, Highlighter, Minus, Plus, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Highlighter, Minus, Plus, Search, X } from "lucide-react";
+import { ListGroup, Row, rowClass, ScreenHeader } from "@/components/app/ui";
+import { Button } from "@/components/ui/button";
 import { booksQueryOptions } from "./queries";
 import { formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
 
@@ -119,15 +121,15 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
     const book = view.book;
     return (
       <section>
-        <BackButton onClick={() => setView({ name: "home" })}>{book.name}</BackButton>
-        <h1 className="mt-4 font-serif text-2xl">{book.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{book.chapter_count} capítulos</p>
-        <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-7">
+        <BackButton onClick={() => setView({ name: "home" })}>Bíblia</BackButton>
+        <h1 className="title-large mt-1">{book.name}</h1>
+        <p className="mt-1 text-[15px] text-muted-foreground">{book.chapter_count} capítulos</p>
+        <div className="mt-5 grid grid-cols-5 gap-2.5 sm:grid-cols-7">
           {Array.from({ length: book.chapter_count }, (_, i) => i + 1).map((n) => (
             <button
               key={n}
               onClick={() => setView({ name: "read", book, chapter: n })}
-              className="rounded-lg border bg-card py-3 text-lg font-serif hover:bg-secondary"
+              className="pressable aspect-square rounded-2xl bg-card text-lg font-medium shadow-card active:bg-secondary"
             >
               {n}
             </button>
@@ -139,93 +141,79 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
 
   return (
     <section>
-      <h1 className="text-3xl">Bíblia</h1>
-      <p className="mt-2 font-serif text-lg text-muted-foreground">Tradução Ave-Maria, 73 livros.</p>
+      <ScreenHeader title="Bíblia" subtitle="Tradução Ave-Maria" />
 
       <form
-        className="mt-4 flex gap-2"
+        className="flex gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           void runSearch();
         }}
       >
-        <label className="flex flex-1 items-center gap-2 rounded-full border bg-card px-4 py-2.5">
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <label className="flex h-11 flex-1 items-center gap-2 rounded-xl bg-secondary px-3">
+          <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
           <input
             type="search"
+            enterKeyHint="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="2Tm 3,14-17 ou uma palavra"
             className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
           />
         </label>
-        <button type="submit" className="rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground">
-          Buscar
-        </button>
+        {searchInput.trim() && (
+          <Button type="submit" size="md">
+            Buscar
+          </Button>
+        )}
       </form>
-      <Link
-        to="/biblia/destaques"
-        className="mt-4 flex items-center gap-3 rounded-2xl border bg-card px-4 py-3.5"
-      >
-        <Highlighter className="h-5 w-5 text-primary" />
-        <span className="flex-1">Destaques e notas</span>
-        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-      </Link>
 
-      {searchError && <p className="mt-2 text-sm text-muted-foreground">{searchError}</p>}
-      {searching && <p className="mt-3 text-sm text-muted-foreground">Buscando…</p>}
+      {searchError && <p className="mt-3 px-1 text-[15px] text-muted-foreground">{searchError}</p>}
+      {searching && <p className="mt-3 px-1 text-[15px] text-muted-foreground">Buscando…</p>}
 
       {results && results.length > 0 && (
-        <div className="mt-4">
-          <h2 className="text-sm font-medium text-muted-foreground">Resultados ({results.length})</h2>
-          <ul className="mt-2 divide-y">
-            {results.map((r) => {
-              const book = books.find((b) => b.id === r.book_id);
-              return (
-                <li key={`${r.book_id}-${r.chapter}-${r.verse}`}>
-                  <button onClick={() => openResult(r)} className="w-full py-3 text-left">
-                    <span className="text-sm font-semibold text-primary">
-                      {book ? formatRef(book, r.chapter, r.verse) : ""}
-                    </span>
-                    <span className="mt-0.5 block font-serif text-[15px] leading-snug text-foreground/90">
-                      {r.text.length > 140 ? `${r.text.slice(0, 140)}…` : r.text}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <ListGroup title={`Resultados (${results.length})`} className="mt-5">
+          {results.map((r) => {
+            const book = books.find((b) => b.id === r.book_id);
+            return (
+              <button key={`${r.book_id}-${r.chapter}-${r.verse}`} onClick={() => openResult(r)} className={`${rowClass} block`}>
+                <span className="text-[15px] font-semibold text-primary">{book ? formatRef(book, r.chapter, r.verse) : ""}</span>
+                <span className="mt-0.5 block font-serif text-base leading-snug">
+                  {r.text.length > 140 ? `${r.text.slice(0, 140)}…` : r.text}
+                </span>
+              </button>
+            );
+          })}
+        </ListGroup>
       )}
 
+      <ListGroup className="mt-5">
+        <Link to="/biblia/destaques" className={rowClass}>
+          <Row icon={Highlighter} title="Destaques e notas" chevron />
+        </Link>
+      </ListGroup>
+
       {booksQuery.isLoading && <p className="mt-6 text-muted-foreground">Carregando livros…</p>}
-      {booksQuery.isError && (
-        <p className="mt-6 text-muted-foreground">Não consegui carregar os livros. Recarregue a página.</p>
-      )}
+      {booksQuery.isError && <p className="mt-6 text-muted-foreground">Não consegui carregar os livros. Recarregue a página.</p>}
 
       {(["antigo", "novo"] as const).map((testament) => {
         const list = books.filter((b) => b.testament === testament);
         if (list.length === 0) return null;
         return (
-          <div key={testament} className="mt-6">
-            <h2 className="text-sm font-medium text-muted-foreground">
-              {testament === "antigo" ? "Antigo Testamento" : "Novo Testamento"}
-            </h2>
-            <ul className="mt-2 divide-y">
-              {list.map((b) => (
-                <li key={b.id}>
-                  <button
-                    onClick={() => setView({ name: "chapters", book: b })}
-                    className="flex w-full items-baseline gap-3 py-3 text-left"
-                  >
-                    <span className="w-14 shrink-0 text-sm font-semibold text-primary">{b.abbreviation}</span>
-                    <span className="flex-1">{b.name}</span>
-                    <span className="text-xs text-muted-foreground">{b.chapter_count}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ListGroup key={testament} title={testament === "antigo" ? "Antigo Testamento" : "Novo Testamento"} className="mt-7">
+            {list.map((b) => (
+              <button key={b.id} onClick={() => setView({ name: "chapters", book: b })} className={rowClass}>
+                <Row
+                  title={
+                    <>
+                      {b.name} <span className="text-[15px] text-muted-foreground">{b.abbreviation}</span>
+                    </>
+                  }
+                  chevron
+                />
+              </button>
+            ))}
+          </ListGroup>
         );
       })}
     </section>
@@ -234,8 +222,8 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
 
 function BackButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-1 text-sm text-primary">
-      <span aria-hidden>‹</span> {children}
+    <button onClick={onClick} className="pressable -ml-2 flex h-10 items-center gap-0.5 pr-3 text-[17px] text-primary">
+      <ChevronLeft className="h-6 w-6" /> {children}
     </button>
   );
 }
@@ -338,34 +326,35 @@ function ReadingView({
 
   return (
     <section>
-      <BackButton onClick={onBack}>Bíblia</BackButton>
+      <BackButton onClick={onBack}>{book.name}</BackButton>
 
-      <div className="sticky top-[4.5rem] z-[5] -mx-1 mt-3 flex items-center justify-between rounded-full border bg-card/95 px-2 py-1.5 backdrop-blur">
+      {/* Barra do leitor: presa logo abaixo da área do relógio do iPhone. */}
+      <div className="sticky top-[max(env(safe-area-inset-top),0.5rem)] z-[5] mt-1 flex items-center justify-between rounded-full bg-glass p-1 shadow-card backdrop-blur-xl backdrop-saturate-150">
         <button
           onClick={() => chapter > 1 && onChangeChapter(chapter - 1)}
           disabled={chapter <= 1}
-          className="rounded-full px-3 py-1.5 text-sm disabled:opacity-30"
+          className="pressable rounded-full p-2 text-primary disabled:opacity-30"
           aria-label="Capítulo anterior"
         >
-          ‹
+          <ChevronLeft className="h-5 w-5" />
         </button>
-        <span className="font-serif text-base">
+        <span className="text-[15px] font-semibold">
           {book.name} {chapter}
         </span>
         <div className="flex items-center">
-          <button onClick={() => changeFontSize(-1)} className="rounded-full px-2 py-1.5 text-sm" aria-label="Diminuir letra">
+          <button onClick={() => changeFontSize(-1)} className="pressable rounded-full p-2" aria-label="Diminuir letra">
             <Minus className="h-4 w-4" />
           </button>
-          <button onClick={() => changeFontSize(1)} className="rounded-full px-2 py-1.5 text-sm" aria-label="Aumentar letra">
+          <button onClick={() => changeFontSize(1)} className="pressable rounded-full p-2" aria-label="Aumentar letra">
             <Plus className="h-4 w-4" />
           </button>
           <button
             onClick={() => chapter < book.chapter_count && onChangeChapter(chapter + 1)}
             disabled={chapter >= book.chapter_count}
-            className="rounded-full px-3 py-1.5 text-sm disabled:opacity-30"
+            className="pressable rounded-full p-2 text-primary disabled:opacity-30"
             aria-label="Próximo capítulo"
           >
-            ›
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -373,7 +362,7 @@ function ReadingView({
       {versesQuery.isLoading && <p className="mt-6 text-muted-foreground">Carregando capítulo…</p>}
       {versesQuery.isError && <p className="mt-6 text-muted-foreground">Não consegui carregar o texto. Recarregue a página.</p>}
 
-      <div className="mt-4 font-serif leading-relaxed" style={{ fontSize: `${fontSize}px` }}>
+      <div className="mt-5 font-serif leading-[1.7]" style={{ fontSize: `${fontSize}px` }}>
         {verses.map((v) => {
           const mark = markMap.get(v.verse);
           const hlClass = mark?.highlight ? HIGHLIGHTS.find((h) => h.value === mark.highlight)?.className : undefined;
@@ -384,11 +373,11 @@ function ReadingView({
               ref={(el) => {
                 if (el) verseRefs.current.set(v.verse, el);
               }}
-              className={`mb-2 rounded-md px-1 py-0.5 ${hlClass ?? ""} ${isFlash ? "hl-flash" : ""}`}
+              className={`mb-1.5 rounded-lg px-1.5 py-0.5 transition-colors ${hlClass ?? ""} ${isFlash ? "hl-flash" : ""}`}
               onClick={() => setSelectedVerse(v.verse)}
               role="button"
             >
-              <span className="mr-1.5 align-super font-sans text-[0.65em] font-semibold text-primary">{v.verse}</span>
+              <span className="mr-1 align-super font-sans text-[0.6em] font-medium text-muted-foreground">{v.verse}</span>
               {v.text}
               {mark?.note && <span className="ml-1 align-super font-sans text-[0.6em] text-muted-foreground">✎</span>}
             </p>
@@ -490,39 +479,38 @@ function VerseSheet({
   return (
     <div className="fixed inset-0 z-30 flex items-end bg-black/30" onClick={onClose}>
       <div
-        className="mx-auto w-full max-w-xl rounded-t-2xl border-t bg-card p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)]"
+        className="mx-auto w-full max-w-xl rounded-t-[28px] bg-card px-5 pt-2 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] shadow-card"
         onClick={(e) => e.stopPropagation()}
       >
+        <span className="mx-auto mb-3 block h-1.5 w-10 rounded-full bg-border" aria-hidden />
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg">
-            {formatRef(book, chapter, verse)}
-          </h2>
-          <button onClick={onClose} aria-label="Fechar" className="rounded-full p-1.5 text-muted-foreground hover:bg-secondary">
+          <h2 className="title">{formatRef(book, chapter, verse)}</h2>
+          <button onClick={onClose} aria-label="Fechar" className="pressable rounded-full bg-secondary p-1.5 text-muted-foreground">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="mt-1 text-sm text-muted-foreground">Destacar</p>
+        <p className="eyebrow mt-4">Destacar</p>
         <div className="mt-2 flex gap-2">
           {HIGHLIGHTS.map((h) => (
             <button
               key={h.value}
               onClick={() => onSetHighlight(h.value)}
-              className={`h-9 flex-1 rounded-lg border ${h.className} ${mark?.highlight === h.value ? "ring-2 ring-ring" : ""}`}
+              className={`pressable h-11 flex-1 rounded-xl ${h.className} ${mark?.highlight === h.value ? "ring-2 ring-ring ring-offset-2 ring-offset-card" : ""}`}
               aria-label={`Destacar em ${h.label}`}
             />
           ))}
           {mark?.highlight && (
             <button
               onClick={() => onSetHighlight(null)}
-              className="h-9 flex-1 rounded-lg border text-sm text-muted-foreground"
+              className="pressable h-11 flex-1 rounded-xl bg-secondary text-[15px] text-muted-foreground"
             >
               Remover
             </button>
           )}
         </div>
 
-        <p className="mt-4 text-sm text-muted-foreground">Nota</p>
+        <p className="eyebrow mt-5">Nota</p>
         <textarea
           value={noteDraft}
           onChange={(e) => setNoteDraft(e.target.value)}
@@ -532,11 +520,11 @@ function VerseSheet({
           }}
           rows={3}
           placeholder="O que este versículo te fez pensar?"
-          className="mt-2 w-full rounded-lg border bg-background p-3 font-serif text-base outline-none placeholder:text-muted-foreground"
+          className="mt-2 w-full rounded-xl bg-secondary p-3 font-serif text-base outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
         />
 
         {!showLinked ? (
-          <button onClick={() => void loadLinks()} className="mt-4 text-sm text-primary underline-offset-2 hover:underline">
+          <button onClick={() => void loadLinks()} className="mt-4 text-[15px] text-primary">
             Ver anotações ligadas
           </button>
         ) : links === null ? (
