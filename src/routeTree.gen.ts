@@ -14,10 +14,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAulasRouteImport } from './routes/_authenticated/aulas'
-import { Route as AuthenticatedBibliaRouteImport } from './routes/_authenticated/biblia'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated/lectio'
 import { Route as AuthenticatedReflexoesRouteImport } from './routes/_authenticated/reflexoes'
+import { Route as AuthenticatedBibliaIndexRouteImport } from './routes/_authenticated/biblia/index'
+import { Route as AuthenticatedBibliaDestaquesRouteImport } from './routes/_authenticated/biblia/destaques'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -43,11 +44,6 @@ const AuthenticatedAulasRoute = AuthenticatedAulasRouteImport.update({
   path: '/aulas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedBibliaRoute = AuthenticatedBibliaRouteImport.update({
-  id: '/biblia',
-  path: '/biblia',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
   id: '/historico',
   path: '/historico',
@@ -63,26 +59,40 @@ const AuthenticatedReflexoesRoute = AuthenticatedReflexoesRouteImport.update({
   path: '/reflexoes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBibliaIndexRoute =
+  AuthenticatedBibliaIndexRouteImport.update({
+    id: '/biblia/',
+    path: '/biblia/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBibliaDestaquesRoute =
+  AuthenticatedBibliaDestaquesRouteImport.update({
+    id: '/biblia/destaques',
+    path: '/biblia/destaques',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/aulas': typeof AuthenticatedAulasRoute
-  '/biblia': typeof AuthenticatedBibliaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
   '/reflexoes': typeof AuthenticatedReflexoesRoute
+  '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/biblia/': typeof AuthenticatedBibliaIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/aulas': typeof AuthenticatedAulasRoute
-  '/biblia': typeof AuthenticatedBibliaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
   '/reflexoes': typeof AuthenticatedReflexoesRoute
   '/': typeof AuthenticatedIndexRoute
+  '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/biblia': typeof AuthenticatedBibliaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -90,11 +100,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/aulas': typeof AuthenticatedAulasRoute
-  '/_authenticated/biblia': typeof AuthenticatedBibliaRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/lectio': typeof AuthenticatedLectioRoute
   '/_authenticated/reflexoes': typeof AuthenticatedReflexoesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/_authenticated/biblia/': typeof AuthenticatedBibliaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -103,31 +114,34 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/aulas'
-    | '/biblia'
     | '/historico'
     | '/lectio'
     | '/reflexoes'
+    | '/biblia/destaques'
+    | '/biblia/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/reset-password'
     | '/aulas'
-    | '/biblia'
     | '/historico'
     | '/lectio'
     | '/reflexoes'
     | '/'
+    | '/biblia/destaques'
+    | '/biblia'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
     | '/_authenticated/aulas'
-    | '/_authenticated/biblia'
     | '/_authenticated/historico'
     | '/_authenticated/lectio'
     | '/_authenticated/reflexoes'
     | '/_authenticated/'
+    | '/_authenticated/biblia/destaques'
+    | '/_authenticated/biblia/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -173,13 +187,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAulasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/biblia': {
-      id: '/_authenticated/biblia'
-      path: '/biblia'
-      fullPath: '/biblia'
-      preLoaderRoute: typeof AuthenticatedBibliaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/historico': {
       id: '/_authenticated/historico'
       path: '/historico'
@@ -201,25 +208,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReflexoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/biblia/': {
+      id: '/_authenticated/biblia/'
+      path: '/biblia'
+      fullPath: '/biblia/'
+      preLoaderRoute: typeof AuthenticatedBibliaIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/biblia/destaques': {
+      id: '/_authenticated/biblia/destaques'
+      path: '/biblia/destaques'
+      fullPath: '/biblia/destaques'
+      preLoaderRoute: typeof AuthenticatedBibliaDestaquesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAulasRoute: typeof AuthenticatedAulasRoute
-  AuthenticatedBibliaRoute: typeof AuthenticatedBibliaRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedLectioRoute: typeof AuthenticatedLectioRoute
   AuthenticatedReflexoesRoute: typeof AuthenticatedReflexoesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedBibliaDestaquesRoute: typeof AuthenticatedBibliaDestaquesRoute
+  AuthenticatedBibliaIndexRoute: typeof AuthenticatedBibliaIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAulasRoute: AuthenticatedAulasRoute,
-  AuthenticatedBibliaRoute: AuthenticatedBibliaRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedLectioRoute: AuthenticatedLectioRoute,
   AuthenticatedReflexoesRoute: AuthenticatedReflexoesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedBibliaDestaquesRoute: AuthenticatedBibliaDestaquesRoute,
+  AuthenticatedBibliaIndexRoute: AuthenticatedBibliaIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

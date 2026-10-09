@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Minus, Plus, Search, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight, Highlighter, Minus, Plus, Search, X } from "lucide-react";
 import { formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
 
 type View =
@@ -13,7 +14,7 @@ type VerseRow = { verse: number; text: string };
 type MarkRow = { chapter: number; verse: number; highlight: string | null; note: string | null };
 type SearchResult = { book_id: number; chapter: number; verse: number; text: string; book_name: string };
 
-const HIGHLIGHTS = [
+export const HIGHLIGHTS = [
   { value: "amarelo", label: "Amarelo", className: "hl-amarelo" },
   { value: "verde", label: "Verde", className: "hl-verde" },
   { value: "rosa", label: "Rosa", className: "hl-rosa" },
@@ -171,6 +172,15 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
           Buscar
         </button>
       </form>
+      <Link
+        to="/biblia/destaques"
+        className="mt-4 flex items-center gap-3 rounded-2xl border bg-card px-4 py-3.5"
+      >
+        <Highlighter className="h-5 w-5 text-primary" />
+        <span className="flex-1">Destaques e notas</span>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </Link>
+
       {searchError && <p className="mt-2 text-sm text-muted-foreground">{searchError}</p>}
       {searching && <p className="mt-3 text-sm text-muted-foreground">Buscando…</p>}
 
@@ -313,7 +323,8 @@ function ReadingView({
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["bible-marks", book.id] });
+      // Prefixo: atualiza o livro aberto e a lista de "Destaques e notas".
+      void queryClient.invalidateQueries({ queryKey: ["bible-marks"] });
     },
   });
 

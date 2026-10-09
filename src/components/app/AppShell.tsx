@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <li key={to} className="flex-1">
               <Link
                 to={to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: to === "/" }}
                 className="flex flex-col items-center gap-1 py-3 text-xs text-muted-foreground data-[status=active]:text-primary"
               >
                 <Icon className="h-6 w-6" />

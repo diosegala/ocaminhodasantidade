@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BibliaScreen } from "@/features/biblia/BibliaScreen";
 
-export const Route = createFileRoute("/_authenticated/biblia")({
+export const Route = createFileRoute("/_authenticated/biblia/")({
   validateSearch: (s: Record<string, unknown>): { ref?: string } =>
     typeof s["ref"] === "string" && s["ref"] ? { ref: s["ref"] } : {},
   head: () => ({
