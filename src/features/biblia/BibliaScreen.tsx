@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Highlighter, Minus, Plus, Search, X } from "lucide-react";
+import { booksQueryOptions } from "./queries";
 import { formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
 
 type View =
@@ -34,17 +35,7 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
   const [searching, setSearching] = useState(false);
   const [pendingRef, setPendingRef] = useState<ParsedReference | null>(null);
 
-  const booksQuery = useQuery({
-    queryKey: ["bible-books"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bible_books")
-        .select("id, name, abbreviation, testament, book_order, chapter_count")
-        .order("book_order");
-      if (error) throw error;
-      return data as BookLite[];
-    },
-  });
+  const booksQuery = useQuery(booksQueryOptions);
 
   const books = booksQuery.data ?? [];
 

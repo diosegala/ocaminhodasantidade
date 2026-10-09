@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Highlighter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { parseReference, type BookLite } from "@/features/biblia/reference";
+import { booksQueryOptions } from "@/features/biblia/queries";
 import { getLiturgy } from "./liturgy.functions";
 import type { Reading } from "./liturgy";
 
@@ -15,6 +16,8 @@ type Entry = {
   prayer: string | null;
   contemplation: string | null;
   completed_at: string | null;
+  /** Texto guardado só no aparelho, ainda não enviado ao servidor. */
+  _unsynced?: boolean;
 };
 
 const EMPTY: Entry = { reference: null, reading_mark: null, meditation: null, prayer: null, contemplation: null, completed_at: null };
@@ -27,18 +30,7 @@ const STEPS = [
 ] as const;
 
 export function useBooks() {
-  return useQuery({
-    queryKey: ["bible-books"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bible_books")
-        .select("id, name, abbreviation, testament, book_order, chapter_count")
-        .order("book_order");
-      if (error) throw error;
-      return data as BookLite[];
-    },
-    staleTime: Infinity,
-  });
+  return useQuery(booksQueryOptions);
 }
 
 export function useLiturgy(date: string) {
@@ -67,30 +59,53 @@ export function LectioScreen({ date }: { date: string }) {
 
   const [entry, setEntry] = useState<Entry | null>(null);
   const [step, setStep] = useState(0);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error" | "offline">("idle");
   const dirty = useRef(false);
+  const entryRef = useRef(entry);
+  entryRef.current = entry;
 
   useEffect(() => {
-    if (entryQ.data !== undefined && entry === null) {
-      setEntry(entryQ.data ?? EMPTY);
-      if (entryQ.data?.completed_at) setStep(4);
-    }
-  }, [entryQ.data, entry]);
+    if (entry !== null) return;
+    // Sem internet e sem nada guardado: começa em branco e envia quando a conexão voltar.
+    const offlineEmpty = entryQ.data === undefined && entryQ.fetchStatus === "paused";
+    if (entryQ.data === undefined && !offlineEmpty) return;
+    const initial = entryQ.data ?? EMPTY;
+    if (initial._unsynced) dirty.current = true;
+    setEntry(initial);
+    if (initial.completed_at) setStep(4);
+  }, [entryQ.data, entryQ.fetchStatus, entry]);
 
   const liturgy = liturgyQ.data?.liturgy ?? null;
   const readings = liturgy?.readings ?? [];
   const reference = entry?.reference ?? readings.find((r) => r.kind === "evangelho")?.referencia ?? null;
   const liturgyReading = readings.find((r) => r.referencia === reference) ?? null;
 
-  // Autosave com pequena espera
+  // Autosave com pequena espera. Antes, guarda no cache (que fica no aparelho),
+  // para nada se perder se a internet falhar ou o app for fechado.
   useEffect(() => {
     if (!entry || !dirty.current) return;
+    queryClient.setQueryData(["lectio", date], { ...entry, _unsynced: true });
     const t = setTimeout(() => void save(entry), 800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
 
-  async function save(e: Entry, extra?: Partial<Entry>) {
+  const saveRef = useRef(save);
+  saveRef.current = save;
+
+  // Envia o que ficou pendente quando a internet volta, e ao sair da tela.
+  useEffect(() => {
+    const flush = () => {
+      if (dirty.current && entryRef.current) void saveRef.current(entryRef.current);
+    };
+    window.addEventListener("online", flush);
+    return () => {
+      window.removeEventListener("online", flush);
+      flush();
+    };
+  }, []);
+
+  async function save(e: Entry, extra?: Pick<Entry, "completed_at">) {
     dirty.current = false;
     setSaveState("saving");
     const payload = {
@@ -109,10 +124,13 @@ export function LectioScreen({ date }: { date: string }) {
       .select("id")
       .single();
     if (error) {
-      setSaveState("error");
+      dirty.current = true;
+      setSaveState(navigator.onLine ? "error" : "offline");
+      queryClient.setQueryData(["lectio", date], { ...(entryRef.current ?? e), _unsynced: true });
       return null;
     }
     setSaveState("saved");
+    if (!dirty.current) queryClient.setQueryData(["lectio", date], { ...e, ...extra, id: data.id });
     queryClient.invalidateQueries({ queryKey: ["lectio-history"] });
     return data.id as string;
   }
@@ -256,7 +274,13 @@ export function LectioScreen({ date }: { date: string }) {
 }
 
 function SaveBadge({ state }: { state: string }) {
-  const label = { idle: "", saving: "Salvando…", saved: "Salvo", error: "Não salvou — verifique a internet" }[state];
+  const label = {
+    idle: "",
+    saving: "Salvando…",
+    saved: "Salvo",
+    error: "Não salvou — verifique a internet",
+    offline: "Guardado no aparelho",
+  }[state];
   return <span className="text-xs text-muted-foreground">{label}</span>;
 }
 

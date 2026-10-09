@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PasswordInput } from "@/components/app/PasswordInput";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -15,56 +16,31 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Mode = "entrar" | "criar" | "esqueci";
-
 function friendly(msg: string) {
-  if (msg.includes("EMAIL_NOT_ALLOWED") || msg.toLowerCase().includes("database error saving new user"))
-    return "Este e-mail ainda não foi liberado para criar conta.";
   if (msg.includes("Invalid login")) return "E-mail ou senha incorretos.";
-  if (msg.includes("Email not confirmed")) return "Confirme seu e-mail pelo link que enviamos.";
+  if (msg.toLowerCase().includes("fetch")) return "Sem conexão. Verifique a internet e tente de novo.";
   return msg;
 }
 
+// Contas são criadas pelo dono do app (tela Pessoas); não há cadastro nem e-mails.
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("entrar");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [forgot, setForgot] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
-    try {
-      if (mode === "entrar") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/" });
-      } else if (mode === "criar") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        if (data.session) navigate({ to: "/" });
-        else toast.success("Conta criada. Confirme pelo link enviado ao seu e-mail.");
-      } else {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
-        if (error) throw error;
-        toast.success("Enviamos um link para criar uma nova senha.");
-        setMode("entrar");
-      }
-    } catch (err) {
-      toast.error(friendly((err as Error).message));
-    } finally {
-      setBusy(false);
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    setBusy(false);
+    if (error) {
+      toast.error(friendly(error.message));
+      return;
     }
+    navigate({ to: "/" });
   }
-
-  const titles: Record<Mode, string> = { entrar: "Entrar", criar: "Criar conta", esqueci: "Nova senha" };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-6">
@@ -73,40 +49,43 @@ function AuthPage() {
         <p className="mt-2 font-serif text-muted-foreground">Catequese, Palavra e oração.</p>
 
         <form onSubmit={submit} className="mt-10 space-y-4">
-          <h2 className="text-xl">{titles[mode]}</h2>
+          <h2 className="text-xl">Entrar</h2>
           <input
             type="email"
             required
             autoComplete="email"
+            autoCapitalize="none"
             placeholder="E-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-xl border bg-card px-4 py-3.5 text-base outline-none focus:ring-2 focus:ring-ring"
           />
-          {mode !== "esqueci" && (
-            <input
-              type="password"
-              required
-              minLength={8}
-              autoComplete={mode === "criar" ? "new-password" : "current-password"}
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border bg-card px-4 py-3.5 text-base outline-none focus:ring-2 focus:ring-ring"
-            />
-          )}
+          <PasswordInput
+            required
+            autoComplete="current-password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           <button
             disabled={busy}
             className="w-full rounded-xl bg-primary py-3.5 font-medium text-primary-foreground disabled:opacity-60"
           >
-            {busy ? "Aguarde…" : mode === "esqueci" ? "Enviar link" : titles[mode]}
+            {busy ? "Aguarde…" : "Entrar"}
           </button>
         </form>
 
-        <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-          {mode !== "entrar" && <button onClick={() => setMode("entrar")} className="block underline">Já tenho conta</button>}
-          {mode !== "criar" && <button onClick={() => setMode("criar")} className="block underline">Criar conta (e-mail liberado)</button>}
-          {mode !== "esqueci" && <button onClick={() => setMode("esqueci")} className="block underline">Esqueci minha senha</button>}
+        <div className="mt-6 text-sm text-muted-foreground">
+          {forgot ? (
+            <p className="rounded-xl bg-secondary p-4 font-serif text-base leading-relaxed">
+              Peça a quem te convidou para redefinir a sua senha. Você vai receber uma senha temporária e, ao entrar,
+              cria uma nova.
+            </p>
+          ) : (
+            <button onClick={() => setForgot(true)} className="underline">
+              Esqueci minha senha
+            </button>
+          )}
         </div>
       </div>
     </div>

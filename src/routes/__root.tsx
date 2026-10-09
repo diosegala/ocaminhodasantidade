@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import {
   Outlet,
   Link,
@@ -14,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { idbPersister, PERSIST_MAX_AGE } from "@/lib/query-persister";
 
 function NotFoundComponent() {
   return (
@@ -117,15 +119,30 @@ function RootComponent() {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      if (event === "SIGNED_OUT") void idbPersister.removeClient();
+      else queryClient.invalidateQueries();
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useEffect(registerServiceWorker, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister: idbPersister, maxAge: PERSIST_MAX_AGE, buster: "1" }}
+    >
       <Outlet />
       <Toaster />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
+}
+
+// O service worker guarda o app no aparelho para abrir sem internet. Fica fora das
+// pré-visualizações do Lovable, onde atrapalharia as atualizações do editor.
+function registerServiceWorker() {
+  if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
+  const preview = /(^|\.)lovableproject(-dev)?\.com$|^(id-)?preview--/.test(location.hostname);
+  if (preview || window.self !== window.top) return;
+  void navigator.serviceWorker.register("/sw.js").catch(() => {});
 }

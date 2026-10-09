@@ -1,8 +1,8 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, GraduationCap, LogOut, Moon, NotebookPen, Search, Sun, Sunrise } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { BookOpen, CircleUser, CloudOff, GraduationCap, Moon, NotebookPen, Search, Sun, Sunrise } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { booksQueryOptions } from "@/features/biblia/queries";
 
 const tabs = [
   { to: "/", label: "Hoje", icon: Sunrise },
@@ -11,25 +11,44 @@ const tabs = [
   { to: "/reflexoes", label: "Reflexões", icon: NotebookPen },
 ] as const;
 
+// Telas carregadas com antecedência, para abrirem mesmo sem internet.
+const WARM_ROUTES = ["/", "/aulas", "/biblia", "/biblia/destaques", "/reflexoes", "/lectio", "/historico", "/conta", "/senha"] as const;
+
+function subscribeOnline(cb: () => void) {
+  window.addEventListener("online", cb);
+  window.addEventListener("offline", cb);
+  return () => {
+    window.removeEventListener("online", cb);
+    window.removeEventListener("offline", cb);
+  };
+}
+
+export function useOnline() {
+  return useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const online = useOnline();
   const [dark, setDark] = useState(false);
 
   useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);
+
+  useEffect(() => {
+    if (!online) return;
+    const id = window.setTimeout(() => {
+      for (const to of WARM_ROUTES) void router.preloadRoute({ to }).catch(() => {});
+      void queryClient.prefetchQuery(booksQueryOptions);
+    }, 1500);
+    return () => window.clearTimeout(id);
+  }, [online, router, queryClient]);
 
   function toggleTheme() {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
-  }
-
-  async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
   }
 
   return (
@@ -47,10 +66,19 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button onClick={toggleTheme} aria-label="Mudar tema" className="rounded-full p-2.5 text-muted-foreground hover:bg-secondary">
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
-          <button onClick={signOut} aria-label="Sair" className="rounded-full p-2.5 text-muted-foreground hover:bg-secondary">
-            <LogOut className="h-5 w-5" />
-          </button>
+          <Link
+            to="/conta"
+            aria-label="Minha conta"
+            className="rounded-full p-2.5 text-muted-foreground hover:bg-secondary data-[status=active]:bg-accent data-[status=active]:text-primary"
+          >
+            <CircleUser className="h-5 w-5" />
+          </Link>
         </div>
+        {!online && (
+          <p className="mt-2 flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-sm text-muted-foreground">
+            <CloudOff className="h-4 w-4 shrink-0" /> Sem internet · mostrando o que já está no aparelho
+          </p>
+        )}
       </header>
 
       <main className="flex-1 px-5 pb-28 pt-4">{children}</main>
@@ -62,9 +90,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 to={to}
                 activeOptions={{ exact: to === "/" }}
-                className="flex flex-col items-center gap-1 py-3 text-xs text-muted-foreground data-[status=active]:text-primary"
+                className="group flex flex-col items-center gap-0.5 pb-2 pt-2 text-xs text-muted-foreground data-[status=active]:font-semibold data-[status=active]:text-primary"
               >
-                <Icon className="h-6 w-6" />
+                <span className="flex h-8 w-14 items-center justify-center rounded-full transition-colors group-data-[status=active]:bg-accent">
+                  <Icon className="h-6 w-6" />
+                </span>
                 {label}
               </Link>
             </li>
