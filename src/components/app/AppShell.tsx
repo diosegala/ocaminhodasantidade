@@ -1,8 +1,9 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useIsRestoring, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, CloudOff, GraduationCap, NotebookPen, Sunrise } from "lucide-react";
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { booksQueryOptions } from "@/features/biblia/queries";
+import { syncPending } from "@/lib/sync-pending";
 
 const tabs = [
   { to: "/", label: "Hoje", icon: Sunrise },
@@ -45,11 +46,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const online = useOnline();
+  const restoring = useIsRestoring();
+
+  // Envia o que foi escrito offline assim que o cache do aparelho é lido e há internet.
+  useEffect(() => {
+    if (online && !restoring) void syncPending(queryClient);
+  }, [online, restoring, queryClient]);
 
   useEffect(() => {
     if (!online) return;
     const id = window.setTimeout(() => {
       for (const to of WARM_ROUTES) void router.preloadRoute({ to }).catch(() => {});
+      // O editor de reflexão tem parâmetro; qualquer id carrega o código da tela.
+      void router.preloadRoute({ to: "/reflexoes/$id", params: { id: "_" } }).catch(() => {});
       void queryClient.prefetchQuery(booksQueryOptions);
     }, 1500);
     return () => window.clearTimeout(id);

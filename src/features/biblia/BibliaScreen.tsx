@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Highlighter, Minus, Plus, Search, X } from "
 import { ListGroup, Row, rowClass, ScreenHeader } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { booksQueryOptions } from "./queries";
-import { formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
+import { formatLinkRef, formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
 
 type View =
   | { name: "home" }
@@ -15,6 +15,14 @@ type View =
 
 type VerseRow = { verse: number; text: string };
 type MarkRow = { chapter: number; verse: number; highlight: string | null; note: string | null };
+type LinkedItem = {
+  key: string;
+  type: string;
+  sourceId: string;
+  title: string;
+  date: string | null;
+  ref: string;
+};
 type SearchResult = { book_id: number; chapter: number; verse: number; text: string; book_name: string };
 
 export const HIGHLIGHTS = [
@@ -452,13 +460,13 @@ function VerseSheet({
 }) {
   const [noteDraft, setNoteDraft] = useState(mark?.note ?? "");
   const [showLinked, setShowLinked] = useState(false);
-  const [links, setLinks] = useState<{ source_type: string; ref: string }[] | null>(null);
+  const [links, setLinks] = useState<LinkedItem[] | null>(null);
 
   async function loadLinks() {
     setShowLinked(true);
     const { data, error } = await supabase
       .from("bible_links")
-      .select("source_type, verse_start, verse_end")
+      .select("source_type, source_id, verse_start, verse_end")
       .eq("book_id", book.id)
       .eq("chapter", chapter);
     if (error) {
@@ -468,10 +476,30 @@ function VerseSheet({
     const rows = (data ?? []).filter(
       (l) => l.verse_start === null || (l.verse_start <= verse && (l.verse_end ?? l.verse_start) >= verse),
     );
+    // Busca o título de cada reflexão e a data de cada lectio, para abrir com um toque.
+    const idsOf = (type: string) => rows.filter((l) => l.source_type === type).map((l) => l.source_id);
+    const [refl, lect] = await Promise.all([
+      idsOf("reflexao").length
+        ? supabase.from("reflections").select("id, title").in("id", idsOf("reflexao"))
+        : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+      idsOf("lectio").length
+        ? supabase.from("lectio_entries").select("id, date").in("id", idsOf("lectio"))
+        : Promise.resolve({ data: [] as { id: string; date: string }[] }),
+    ]);
+    const titles = new Map((refl.data ?? []).map((r) => [r.id, r.title.trim() || "Sem título"]));
+    const dates = new Map((lect.data ?? []).map((r) => [r.id, r.date]));
     setLinks(
-      rows.map((l) => ({
-        source_type: l.source_type,
-        ref: l.verse_start ? formatRef(book, chapter, l.verse_start, l.verse_end) : "",
+      rows.map((l, i) => ({
+        key: `${l.source_type}-${l.source_id}-${i}`,
+        type: l.source_type,
+        sourceId: l.source_id,
+        title:
+          titles.get(l.source_id) ??
+          (dates.has(l.source_id)
+            ? new Date(dates.get(l.source_id)! + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
+            : ""),
+        date: dates.get(l.source_id) ?? null,
+        ref: formatLinkRef(book, chapter, l.verse_start, l.verse_end),
       })),
     );
   }
@@ -534,14 +562,36 @@ function VerseSheet({
             Nenhuma aula, reflexão ou lectio cita este trecho ainda.
           </p>
         ) : (
-          <ul className="mt-4 space-y-1 text-sm">
-            {links.map((l, i) => (
-              <li key={i}>
-                <span className="font-medium">{LINK_SOURCE_LABEL[l.source_type] ?? l.source_type}</span>
-                {l.ref && <span className="text-muted-foreground"> · {l.ref}</span>}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-4 overflow-hidden rounded-xl bg-secondary [&>*+*]:border-t">
+            {links.map((l) => {
+              const content = (
+                <>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">
+                      <span className="font-medium">{LINK_SOURCE_LABEL[l.type] ?? l.type}</span>
+                      {l.title && ` · ${l.title}`}
+                    </span>
+                    <span className="block text-[13px] text-muted-foreground">{l.ref}</span>
+                  </span>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground/60" />
+                </>
+              );
+              const cls = "flex items-center gap-3 px-4 py-3 text-[15px] active:bg-border/40";
+              return l.type === "reflexao" ? (
+                <Link key={l.key} to="/reflexoes/$id" params={{ id: l.sourceId }} className={cls}>
+                  {content}
+                </Link>
+              ) : l.type === "lectio" && l.date ? (
+                <Link key={l.key} to="/lectio" search={{ date: l.date }} className={cls}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={l.key} className={cls}>
+                  {content}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

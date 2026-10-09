@@ -104,3 +104,13 @@ export function formatRef(book: { abbreviation: string }, chapter: number, verse
     ? `${book.abbreviation} ${chapter},${verse}-${verseEnd}`
     : `${book.abbreviation} ${chapter},${verse}`;
 }
+
+/** Referência de um trecho ligado; sem versículo inicial, vale o capítulo inteiro. */
+export function formatLinkRef(
+  book: { abbreviation: string },
+  chapter: number,
+  verseStart: number | null,
+  verseEnd: number | null,
+): string {
+  return verseStart ? formatRef(book, chapter, verseStart, verseEnd) : `${book.abbreviation} ${chapter}`;
+}

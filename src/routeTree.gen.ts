@@ -17,10 +17,11 @@ import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated/lectio'
 import { Route as AuthenticatedPessoasRouteImport } from './routes/_authenticated/pessoas'
-import { Route as AuthenticatedReflexoesRouteImport } from './routes/_authenticated/reflexoes'
 import { Route as AuthenticatedSenhaRouteImport } from './routes/_authenticated/senha'
 import { Route as AuthenticatedBibliaIndexRouteImport } from './routes/_authenticated/biblia/index'
 import { Route as AuthenticatedBibliaDestaquesRouteImport } from './routes/_authenticated/biblia/destaques'
+import { Route as AuthenticatedReflexoesIndexRouteImport } from './routes/_authenticated/reflexoes/index'
+import { Route as AuthenticatedReflexoesIdRouteImport } from './routes/_authenticated/reflexoes/$id'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -61,11 +62,6 @@ const AuthenticatedPessoasRoute = AuthenticatedPessoasRouteImport.update({
   path: '/pessoas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedReflexoesRoute = AuthenticatedReflexoesRouteImport.update({
-  id: '/reflexoes',
-  path: '/reflexoes',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSenhaRoute = AuthenticatedSenhaRouteImport.update({
   id: '/senha',
   path: '/senha',
@@ -83,6 +79,18 @@ const AuthenticatedBibliaDestaquesRoute =
     path: '/biblia/destaques',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReflexoesIndexRoute =
+  AuthenticatedReflexoesIndexRouteImport.update({
+    id: '/reflexoes/',
+    path: '/reflexoes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReflexoesIdRoute =
+  AuthenticatedReflexoesIdRouteImport.update({
+    id: '/reflexoes/$id',
+    path: '/reflexoes/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -92,10 +100,11 @@ export interface FileRoutesByFullPath {
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
   '/pessoas': typeof AuthenticatedPessoasRoute
-  '/reflexoes': typeof AuthenticatedReflexoesRoute
   '/senha': typeof AuthenticatedSenhaRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/biblia/': typeof AuthenticatedBibliaIndexRoute
+  '/reflexoes/': typeof AuthenticatedReflexoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -104,11 +113,12 @@ export interface FileRoutesByTo {
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
   '/pessoas': typeof AuthenticatedPessoasRoute
-  '/reflexoes': typeof AuthenticatedReflexoesRoute
   '/senha': typeof AuthenticatedSenhaRoute
   '/': typeof AuthenticatedIndexRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/biblia': typeof AuthenticatedBibliaIndexRoute
+  '/reflexoes': typeof AuthenticatedReflexoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -119,11 +129,12 @@ export interface FileRoutesById {
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/lectio': typeof AuthenticatedLectioRoute
   '/_authenticated/pessoas': typeof AuthenticatedPessoasRoute
-  '/_authenticated/reflexoes': typeof AuthenticatedReflexoesRoute
   '/_authenticated/senha': typeof AuthenticatedSenhaRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/_authenticated/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/_authenticated/biblia/': typeof AuthenticatedBibliaIndexRoute
+  '/_authenticated/reflexoes/': typeof AuthenticatedReflexoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -135,10 +146,11 @@ export interface FileRouteTypes {
     | '/historico'
     | '/lectio'
     | '/pessoas'
-    | '/reflexoes'
     | '/senha'
     | '/biblia/destaques'
+    | '/reflexoes/$id'
     | '/biblia/'
+    | '/reflexoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -147,11 +159,12 @@ export interface FileRouteTypes {
     | '/historico'
     | '/lectio'
     | '/pessoas'
-    | '/reflexoes'
     | '/senha'
     | '/'
     | '/biblia/destaques'
+    | '/reflexoes/$id'
     | '/biblia'
+    | '/reflexoes'
   id:
     | '__root__'
     | '/_authenticated'
@@ -161,11 +174,12 @@ export interface FileRouteTypes {
     | '/_authenticated/historico'
     | '/_authenticated/lectio'
     | '/_authenticated/pessoas'
-    | '/_authenticated/reflexoes'
     | '/_authenticated/senha'
     | '/_authenticated/'
     | '/_authenticated/biblia/destaques'
+    | '/_authenticated/reflexoes/$id'
     | '/_authenticated/biblia/'
+    | '/_authenticated/reflexoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -231,13 +245,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPessoasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/reflexoes': {
-      id: '/_authenticated/reflexoes'
-      path: '/reflexoes'
-      fullPath: '/reflexoes'
-      preLoaderRoute: typeof AuthenticatedReflexoesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/senha': {
       id: '/_authenticated/senha'
       path: '/senha'
@@ -259,6 +266,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBibliaDestaquesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reflexoes/': {
+      id: '/_authenticated/reflexoes/'
+      path: '/reflexoes'
+      fullPath: '/reflexoes/'
+      preLoaderRoute: typeof AuthenticatedReflexoesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reflexoes/$id': {
+      id: '/_authenticated/reflexoes/$id'
+      path: '/reflexoes/$id'
+      fullPath: '/reflexoes/$id'
+      preLoaderRoute: typeof AuthenticatedReflexoesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -268,11 +289,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedLectioRoute: typeof AuthenticatedLectioRoute
   AuthenticatedPessoasRoute: typeof AuthenticatedPessoasRoute
-  AuthenticatedReflexoesRoute: typeof AuthenticatedReflexoesRoute
   AuthenticatedSenhaRoute: typeof AuthenticatedSenhaRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedBibliaDestaquesRoute: typeof AuthenticatedBibliaDestaquesRoute
+  AuthenticatedReflexoesIdRoute: typeof AuthenticatedReflexoesIdRoute
   AuthenticatedBibliaIndexRoute: typeof AuthenticatedBibliaIndexRoute
+  AuthenticatedReflexoesIndexRoute: typeof AuthenticatedReflexoesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -281,11 +303,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedLectioRoute: AuthenticatedLectioRoute,
   AuthenticatedPessoasRoute: AuthenticatedPessoasRoute,
-  AuthenticatedReflexoesRoute: AuthenticatedReflexoesRoute,
   AuthenticatedSenhaRoute: AuthenticatedSenhaRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedBibliaDestaquesRoute: AuthenticatedBibliaDestaquesRoute,
+  AuthenticatedReflexoesIdRoute: AuthenticatedReflexoesIdRoute,
   AuthenticatedBibliaIndexRoute: AuthenticatedBibliaIndexRoute,
+  AuthenticatedReflexoesIndexRoute: AuthenticatedReflexoesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

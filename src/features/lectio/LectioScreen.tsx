@@ -7,7 +7,7 @@ import { parseReference, type BookLite } from "@/features/biblia/reference";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { getLiturgy } from "./liturgy.functions";
 import type { Reading } from "./liturgy";
-import { Card, Chip, ScreenHeader } from "@/components/app/ui";
+import { Card, Chip, SaveBadge, ScreenHeader, type SaveState } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 
 type Entry = {
@@ -61,7 +61,7 @@ export function LectioScreen({ date }: { date: string }) {
 
   const [entry, setEntry] = useState<Entry | null>(null);
   const [step, setStep] = useState(0);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error" | "offline">("idle");
+  const [saveState, setSaveState] = useState<SaveState>("idle");
   const dirty = useRef(false);
   const entryRef = useRef(entry);
   entryRef.current = entry;
@@ -277,17 +277,6 @@ export function LectioScreen({ date }: { date: string }) {
       )}
     </section>
   );
-}
-
-function SaveBadge({ state }: { state: string }) {
-  const label = {
-    idle: "",
-    saving: "Salvando…",
-    saved: "Salvo",
-    error: "Não salvou — verifique a internet",
-    offline: "Guardado no aparelho",
-  }[state];
-  return <span className="text-[13px] text-muted-foreground">{label}</span>;
 }
 
 function StepProgress({ step, onPick }: { step: number; onPick: (n: number) => void }) {

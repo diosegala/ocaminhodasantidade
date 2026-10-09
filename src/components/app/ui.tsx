@@ -10,7 +10,8 @@ export function ScreenHeader({
   back,
   action,
 }: {
-  title: string;
+  /** Sem título, só a linha de cima (voltar e ação), como no editor de reflexão. */
+  title?: string;
   subtitle?: ReactNode;
   /** Botão de voltar: volta no histórico ou, se a tela foi aberta direto, vai para `to`. */
   back?: { label: string; to: NonNullable<LinkProps["to"]> };
@@ -35,7 +36,7 @@ export function ScreenHeader({
         )}
         {action ?? (back ? null : <AccountButton />)}
       </div>
-      <h1 className="title-large mt-1">{title}</h1>
+      {title && <h1 className="title-large mt-1">{title}</h1>}
       {subtitle && (
         <p className="mt-1 text-[15px] text-muted-foreground first-letter:uppercase">{subtitle}</p>
       )}
@@ -173,4 +174,19 @@ export function SegmentedControl<T extends string>({
       ))}
     </div>
   );
+}
+
+const SAVE_LABELS = {
+  idle: "",
+  saving: "Salvando…",
+  saved: "Salvo",
+  error: "Não salvou — verifique a internet",
+  offline: "Guardado no aparelho",
+} as const;
+
+export type SaveState = keyof typeof SAVE_LABELS;
+
+/** Estado do salvamento automático (Lectio, Reflexões). */
+export function SaveBadge({ state }: { state: SaveState }) {
+  return <span className="text-[13px] text-muted-foreground">{SAVE_LABELS[state]}</span>;
 }
