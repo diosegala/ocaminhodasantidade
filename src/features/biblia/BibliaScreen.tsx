@@ -298,8 +298,16 @@ function ReadingView({
 
   const saveMark = useMutation({
     mutationFn: async (patch: { verse: number; highlight?: string | null; note?: string | null }) => {
+      // Só envia o campo alterado: o upsert atualiza apenas as colunas presentes,
+      // então salvar o destaque não apaga a nota (e vice-versa).
       const { error } = await supabase.from("verse_marks").upsert(
-        { book_id: book.id, chapter, verse: patch.verse, highlight: patch.highlight ?? null, note: patch.note ?? null },
+        {
+          book_id: book.id,
+          chapter,
+          verse: patch.verse,
+          ...("highlight" in patch ? { highlight: patch.highlight ?? null } : {}),
+          ...("note" in patch ? { note: patch.note ?? null } : {}),
+        },
         { onConflict: "user_id,book_id,chapter,verse" },
       );
       if (error) throw error;
@@ -522,7 +530,7 @@ function VerseSheet({
           }}
           rows={3}
           placeholder="O que este versículo te fez pensar?"
-          className="mt-2 w-full rounded-lg border bg-background p-3 font-serif text-[15px] outline-none placeholder:text-muted-foreground"
+          className="mt-2 w-full rounded-lg border bg-background p-3 font-serif text-base outline-none placeholder:text-muted-foreground"
         />
 
         {!showLinked ? (

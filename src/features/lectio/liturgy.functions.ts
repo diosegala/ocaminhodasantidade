@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireAuth } from "@/lib/require-auth";
 import { normalizeLiturgy, type Liturgy } from "./liturgy";
 
 export type LiturgyResult = { liturgy: Liturgy | null; fromCacheOfDate: string | null };
@@ -13,9 +14,15 @@ async function fetchJson(url: string): Promise<unknown | null> {
   }
 }
 
+const DAY = 86400000;
+
 export const getLiturgy = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
   .inputValidator((input: { date: string }) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(input?.date ?? "")) throw new Error("Data inválida");
+    // Limita a até ~1 ano atrás e 2 meses à frente, para não consultar as APIs com datas arbitrárias.
+    const diff = new Date(input.date + "T12:00:00Z").getTime() - Date.now();
+    if (Number.isNaN(diff) || diff < -400 * DAY || diff > 60 * DAY) throw new Error("Data fora do intervalo");
     return { date: input.date };
   })
   .handler(async ({ data }): Promise<LiturgyResult> => {
