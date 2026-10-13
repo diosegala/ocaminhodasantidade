@@ -173,37 +173,47 @@ export function seasonOf(date: string): Season & { dayColor: LitColor } {
 /** Classes por cor, escritas por extenso para o Tailwind encontrá-las. */
 export const LIT_CLASSES: Record<
   LitColor,
-  { bg: string; ring: string; text: string; stroke: string }
+  { bg: string; ring: string; text: string; stroke: string; fill: string; border: string }
 > = {
   verde: {
     bg: "bg-lit-verde",
     ring: "ring-lit-verde",
     text: "text-lit-verde",
     stroke: "stroke-lit-verde",
+    fill: "fill-lit-verde",
+    border: "border-lit-verde",
   },
   roxo: {
     bg: "bg-lit-roxo",
     ring: "ring-lit-roxo",
     text: "text-lit-roxo",
     stroke: "stroke-lit-roxo",
+    fill: "fill-lit-roxo",
+    border: "border-lit-roxo",
   },
   branco: {
     bg: "bg-lit-branco",
     ring: "ring-lit-branco",
     text: "text-lit-branco",
     stroke: "stroke-lit-branco",
+    fill: "fill-lit-branco",
+    border: "border-lit-branco",
   },
   vermelho: {
     bg: "bg-lit-vermelho",
     ring: "ring-lit-vermelho",
     text: "text-lit-vermelho",
     stroke: "stroke-lit-vermelho",
+    fill: "fill-lit-vermelho",
+    border: "border-lit-vermelho",
   },
   rosa: {
     bg: "bg-lit-rosa",
     ring: "ring-lit-rosa",
     text: "text-lit-rosa",
     stroke: "stroke-lit-rosa",
+    fill: "fill-lit-rosa",
+    border: "border-lit-rosa",
   },
 };
 

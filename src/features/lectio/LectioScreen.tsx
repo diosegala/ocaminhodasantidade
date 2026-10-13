@@ -330,7 +330,7 @@ export function LectioScreen({
             Ver apoio (chega na próxima etapa)
           </Button>
           <Button asChild variant="link" className="w-full text-[17px]">
-            <Link to="/historico">Ver histórico</Link>
+            <Link to="/caminho">Ver meu caminho</Link>
           </Button>
         </div>
       )}

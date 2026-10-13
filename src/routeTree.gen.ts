@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAulasRouteImport } from './routes/_authenticated/aulas'
+import { Route as AuthenticatedCaminhoRouteImport } from './routes/_authenticated/caminho'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated/lectio'
@@ -40,6 +41,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedAulasRoute = AuthenticatedAulasRouteImport.update({
   id: '/aulas',
   path: '/aulas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCaminhoRoute = AuthenticatedCaminhoRouteImport.update({
+  id: '/caminho',
+  path: '/caminho',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedContaRoute = AuthenticatedContaRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/aulas': typeof AuthenticatedAulasRoute
+  '/caminho': typeof AuthenticatedCaminhoRoute
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/aulas': typeof AuthenticatedAulasRoute
+  '/caminho': typeof AuthenticatedCaminhoRoute
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/aulas': typeof AuthenticatedAulasRoute
+  '/_authenticated/caminho': typeof AuthenticatedCaminhoRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/lectio': typeof AuthenticatedLectioRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/aulas'
+    | '/caminho'
     | '/conta'
     | '/historico'
     | '/lectio'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/aulas'
+    | '/caminho'
     | '/conta'
     | '/historico'
     | '/lectio'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/aulas'
+    | '/_authenticated/caminho'
     | '/_authenticated/conta'
     | '/_authenticated/historico'
     | '/_authenticated/lectio'
@@ -215,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/aulas'
       fullPath: '/aulas'
       preLoaderRoute: typeof AuthenticatedAulasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/caminho': {
+      id: '/_authenticated/caminho'
+      path: '/caminho'
+      fullPath: '/caminho'
+      preLoaderRoute: typeof AuthenticatedCaminhoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/conta': {
@@ -285,6 +304,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAulasRoute: typeof AuthenticatedAulasRoute
+  AuthenticatedCaminhoRoute: typeof AuthenticatedCaminhoRoute
   AuthenticatedContaRoute: typeof AuthenticatedContaRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedLectioRoute: typeof AuthenticatedLectioRoute
@@ -299,6 +319,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAulasRoute: AuthenticatedAulasRoute,
+  AuthenticatedCaminhoRoute: AuthenticatedCaminhoRoute,
   AuthenticatedContaRoute: AuthenticatedContaRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedLectioRoute: AuthenticatedLectioRoute,

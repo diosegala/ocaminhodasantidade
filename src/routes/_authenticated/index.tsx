@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Flame, Route as RouteIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { computeStreak, localToday } from "@/features/lectio/liturgy";
@@ -7,6 +8,13 @@ import { useLiturgy } from "@/features/lectio/LectioScreen";
 import { lectioHistoryQueryOptions } from "@/features/lectio/queries";
 import { reflectionsQueryOptions } from "@/features/reflexoes/queries";
 import { DayTrail } from "@/features/caminho/DayTrail";
+import {
+  computeMilestones,
+  markSeen,
+  nextCelebration,
+  type Milestone,
+} from "@/features/caminho/milestones";
+import { MilestoneSheet } from "@/features/caminho/MilestoneSheet";
 import {
   daysBetween,
   LIT_CLASSES,
@@ -58,6 +66,14 @@ function Hoje() {
   const streak = computeStreak(doneDates, date);
   const seasonDays = daysBetween(season.start, date) + 1;
   const seasonDone = doneDates.filter((d) => d >= season.start && d <= date).length;
+  // Celebra um marco recente na primeira vez que a pessoa abre a Hoje depois dele.
+  const [celebrate, setCelebrate] = useState<Milestone | null>(null);
+  useEffect(() => {
+    if (!history.isSuccess) return;
+    setCelebrate(nextCelebration(computeMilestones(doneDates, date), date));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history.isSuccess, history.dataUpdatedAt, date]);
+
   const todayReflection = (reflections.data ?? []).find(
     (r) => (r.title.trim() || r.body.trim()) && localDate(r.updated_at) === date,
   );
@@ -102,7 +118,7 @@ function Hoje() {
       />
 
       <ListGroup className="mt-6">
-        <Link to="/historico" className={rowClass}>
+        <Link to="/caminho" className={rowClass}>
           <Row
             icon={RouteIcon}
             title={season.name}
@@ -110,7 +126,7 @@ function Hoje() {
             chevron
           />
         </Link>
-        <Link to="/historico" className={rowClass}>
+        <Link to="/caminho" className={rowClass}>
           <Row
             icon={Flame}
             title="Dias seguidos"
@@ -119,6 +135,16 @@ function Hoje() {
           />
         </Link>
       </ListGroup>
+
+      {celebrate && (
+        <MilestoneSheet
+          milestone={celebrate}
+          onClose={() => {
+            markSeen([celebrate.id]);
+            setCelebrate(null);
+          }}
+        />
+      )}
     </section>
   );
 }

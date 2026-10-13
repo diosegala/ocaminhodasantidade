@@ -20,7 +20,7 @@ const WARM_ROUTES = [
   "/biblia/destaques",
   "/reflexoes",
   "/lectio",
-  "/historico",
+  "/caminho",
   "/conta",
   "/senha",
 ] as const;
