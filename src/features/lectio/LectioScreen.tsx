@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseReference, type BookLite } from "@/features/biblia/reference";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { getLiturgy } from "./liturgy.functions";
-import type { Reading } from "./liturgy";
+import { splitVerseNumbers, type Reading } from "./liturgy";
 import {
   Card,
   Chip,
@@ -487,7 +487,12 @@ function PassageText(props: {
           <p className="reading mt-2 font-semibold">{props.reading.refrao}</p>
         )}
         <p className="reading mt-3 whitespace-pre-wrap">
-          {highlight(props.reading.texto, props.mark)}
+          {splitVerseNumbers(props.reading.texto).map((seg, i) => (
+            <span key={i}>
+              {seg.verse !== null && <VerseNumber n={seg.verse} />}
+              {highlight(seg.text, props.mark)}
+            </span>
+          ))}
         </p>
         <p className="mt-3 text-xs text-muted-foreground">
           Texto da liturgia (CNBB), como foi publicado.

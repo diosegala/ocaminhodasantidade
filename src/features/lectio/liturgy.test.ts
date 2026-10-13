@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeStreak, normalizeLiturgy } from "./liturgy";
+import { computeStreak, normalizeLiturgy, splitVerseNumbers } from "./liturgy";
 
 describe("normalizeLiturgy", () => {
   it("lê o formato da API principal (listas) e ignora segunda leitura vazia", () => {
@@ -21,7 +21,10 @@ describe("normalizeLiturgy", () => {
 
   it("lê o formato da reserva (objetos soltos, segunda leitura como frase)", () => {
     const lit = normalizeLiturgy(
-      { evangelho: { referencia: "Jo 1,1", texto: "No princípio" }, segundaLeitura: "Não há segunda leitura hoje!" },
+      {
+        evangelho: { referencia: "Jo 1,1", texto: "No princípio" },
+        segundaLeitura: "Não há segunda leitura hoje!",
+      },
       "2026-10-08",
     );
     expect(lit?.readings).toHaveLength(1);
@@ -42,5 +45,40 @@ describe("computeStreak", () => {
   });
   it("zera quando falhou um dia", () => {
     expect(computeStreak(["2026-10-05"], "2026-10-08")).toBe(0);
+  });
+});
+
+describe("splitVerseNumbers", () => {
+  it("separa os números colados nas palavras", () => {
+    expect(
+      splitVerseNumbers("Naquele tempo, 37enquanto Jesus falava. 38O fariseu ficou admirado."),
+    ).toEqual([
+      { verse: null, text: "Naquele tempo, " },
+      { verse: 37, text: "enquanto Jesus falava. " },
+      { verse: 38, text: "O fariseu ficou admirado." },
+    ]);
+  });
+
+  it("aceita aspas e números no começo da linha", () => {
+    expect(splitVerseNumbers("1“Felizes os pobres\n2 Bem-aventurados")).toEqual([
+      { verse: 1, text: "“Felizes os pobres\n" },
+      { verse: 2, text: "Bem-aventurados" },
+    ]);
+  });
+
+  it("funciona com textos reais da liturgia", () => {
+    expect(
+      splitVerseNumbers("Irmãos, 1é para a liberdade. 2Eis que eu").map((p) => p.verse),
+    ).toEqual([null, 1, 2]);
+    expect(splitVerseNumbers("dizendo: 2“O reino dos céus").at(-1)).toEqual({
+      verse: 2,
+      text: "“O reino dos céus",
+    });
+  });
+
+  it("não mexe em números que fazem parte da frase", () => {
+    expect(splitVerseNumbers("Jejuou 40 dias e 40 noites.")).toEqual([
+      { verse: null, text: "Jejuou 40 dias e 40 noites." },
+    ]);
   });
 });

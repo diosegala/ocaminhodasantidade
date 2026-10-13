@@ -37,7 +37,10 @@ const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 export function normalizeLiturgy(raw: unknown, date: string): Liturgy | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  const src = (r["leituras"] && typeof r["leituras"] === "object" ? r["leituras"] : r) as Record<string, unknown>;
+  const src = (r["leituras"] && typeof r["leituras"] === "object" ? r["leituras"] : r) as Record<
+    string,
+    unknown
+  >;
   const map: [ReadingKind, unknown][] = [
     ["primeira", src["primeiraLeitura"]],
     ["salmo", src["salmo"]],
@@ -83,4 +86,28 @@ export function toISO(d: Date): string {
 export function localToday(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export type VerseSegment = { verse: number | null; text: string };
+
+/**
+ * A API da liturgia cola o número do versículo na palavra ("37enquanto"). Separa em
+ * trechos com o número de cada versículo, para mostrá-lo pequeno como na Bíblia.
+ * Conta como número de versículo: 1 a 3 dígitos grudados numa letra ou aspas, ou no
+ * começo de uma linha seguidos de espaço e maiúscula. "40 dias" fica como está.
+ */
+export function splitVerseNumbers(text: string): VerseSegment[] {
+  const re = /(^|[^\p{L}\p{N}])(\d{1,3})(?=[\p{L}“"'«(])|(^|\n)[ \t]*(\d{1,3})[ \t]+(?=\p{Lu})/gu;
+  const parts: VerseSegment[] = [];
+  let verse: number | null = null;
+  let last = 0;
+  for (const m of text.matchAll(re)) {
+    const prefix = m[1] ?? m[3] ?? "";
+    const start = m.index + prefix.length;
+    parts.push({ verse, text: text.slice(last, start) });
+    verse = Number(m[2] ?? m[4]);
+    last = m.index + m[0].length;
+  }
+  parts.push({ verse, text: text.slice(last) });
+  return parts.filter((p) => p.verse !== null || p.text);
 }
