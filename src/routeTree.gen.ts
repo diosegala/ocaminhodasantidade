@@ -20,6 +20,7 @@ import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPessoasRouteImport } from './routes/_authenticated/pessoas'
 import { Route as AuthenticatedSenhaRouteImport } from './routes/_authenticated/senha'
 import { Route as AuthenticatedBibliaIndexRouteImport } from './routes/_authenticated/biblia/index'
+import { Route as AuthenticatedBibliaCatecismoRouteImport } from './routes/_authenticated/biblia/catecismo'
 import { Route as AuthenticatedBibliaDestaquesRouteImport } from './routes/_authenticated/biblia/destaques'
 import { Route as AuthenticatedReflexoesIndexRouteImport } from './routes/_authenticated/reflexoes/index'
 import { Route as AuthenticatedReflexoesIdRouteImport } from './routes/_authenticated/reflexoes/$id'
@@ -79,6 +80,12 @@ const AuthenticatedBibliaIndexRoute =
     path: '/biblia/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBibliaCatecismoRoute =
+  AuthenticatedBibliaCatecismoRouteImport.update({
+    id: '/biblia/catecismo',
+    path: '/biblia/catecismo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBibliaDestaquesRoute =
   AuthenticatedBibliaDestaquesRouteImport.update({
     id: '/biblia/destaques',
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/lectio': typeof AuthenticatedLectioRoute
   '/pessoas': typeof AuthenticatedPessoasRoute
   '/senha': typeof AuthenticatedSenhaRoute
+  '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/biblia/': typeof AuthenticatedBibliaIndexRoute
@@ -123,6 +131,7 @@ export interface FileRoutesByTo {
   '/pessoas': typeof AuthenticatedPessoasRoute
   '/senha': typeof AuthenticatedSenhaRoute
   '/': typeof AuthenticatedIndexRoute
+  '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/biblia': typeof AuthenticatedBibliaIndexRoute
@@ -140,6 +149,7 @@ export interface FileRoutesById {
   '/_authenticated/pessoas': typeof AuthenticatedPessoasRoute
   '/_authenticated/senha': typeof AuthenticatedSenhaRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/_authenticated/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/_authenticated/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/_authenticated/biblia/': typeof AuthenticatedBibliaIndexRoute
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/lectio'
     | '/pessoas'
     | '/senha'
+    | '/biblia/catecismo'
     | '/biblia/destaques'
     | '/reflexoes/$id'
     | '/biblia/'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/pessoas'
     | '/senha'
     | '/'
+    | '/biblia/catecismo'
     | '/biblia/destaques'
     | '/reflexoes/$id'
     | '/biblia'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pessoas'
     | '/_authenticated/senha'
     | '/_authenticated/'
+    | '/_authenticated/biblia/catecismo'
     | '/_authenticated/biblia/destaques'
     | '/_authenticated/reflexoes/$id'
     | '/_authenticated/biblia/'
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBibliaIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/biblia/catecismo': {
+      id: '/_authenticated/biblia/catecismo'
+      path: '/biblia/catecismo'
+      fullPath: '/biblia/catecismo'
+      preLoaderRoute: typeof AuthenticatedBibliaCatecismoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/biblia/destaques': {
       id: '/_authenticated/biblia/destaques'
       path: '/biblia/destaques'
@@ -311,6 +331,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPessoasRoute: typeof AuthenticatedPessoasRoute
   AuthenticatedSenhaRoute: typeof AuthenticatedSenhaRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedBibliaCatecismoRoute: typeof AuthenticatedBibliaCatecismoRoute
   AuthenticatedBibliaDestaquesRoute: typeof AuthenticatedBibliaDestaquesRoute
   AuthenticatedReflexoesIdRoute: typeof AuthenticatedReflexoesIdRoute
   AuthenticatedBibliaIndexRoute: typeof AuthenticatedBibliaIndexRoute
@@ -326,6 +347,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPessoasRoute: AuthenticatedPessoasRoute,
   AuthenticatedSenhaRoute: AuthenticatedSenhaRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedBibliaCatecismoRoute: AuthenticatedBibliaCatecismoRoute,
   AuthenticatedBibliaDestaquesRoute: AuthenticatedBibliaDestaquesRoute,
   AuthenticatedReflexoesIdRoute: AuthenticatedReflexoesIdRoute,
   AuthenticatedBibliaIndexRoute: AuthenticatedBibliaIndexRoute,

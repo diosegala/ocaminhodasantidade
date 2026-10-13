@@ -183,6 +183,7 @@ export type Database = {
           prayer: string | null
           reading_mark: string | null
           reference: string | null
+          steps_done: number
           updated_at: string
           user_id: string
         }
@@ -197,6 +198,7 @@ export type Database = {
           prayer?: string | null
           reading_mark?: string | null
           reference?: string | null
+          steps_done?: number
           updated_at?: string
           user_id?: string
         }
@@ -211,6 +213,7 @@ export type Database = {
           prayer?: string | null
           reading_mark?: string | null
           reference?: string | null
+          steps_done?: number
           updated_at?: string
           user_id?: string
         }

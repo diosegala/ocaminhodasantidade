@@ -25,6 +25,8 @@ type Entry = {
   prayer: string | null;
   contemplation: string | null;
   completed_at: string | null;
+  /** Até qual passo a pessoa rezou (0–4), mesmo sem escrever. */
+  steps_done?: number;
   /** Texto guardado só no aparelho, ainda não enviado ao servidor. */
   _unsynced?: boolean;
 };
@@ -36,6 +38,7 @@ const EMPTY: Entry = {
   prayer: null,
   contemplation: null,
   completed_at: null,
+  steps_done: 0,
 };
 
 const STEPS = [
@@ -145,7 +148,7 @@ export function LectioScreen({
     };
   }, []);
 
-  async function save(e: Entry, extra?: Pick<Entry, "completed_at">) {
+  async function save(e: Entry, extra?: Pick<Entry, "completed_at" | "steps_done">) {
     dirty.current = false;
     setSaveState("saving");
     const payload = {
@@ -156,6 +159,7 @@ export function LectioScreen({
       prayer: e.prayer,
       contemplation: e.contemplation,
       completed_at: e.completed_at,
+      steps_done: e.steps_done ?? 0,
       ...extra,
     };
     const { data, error } = await supabase
@@ -175,6 +179,12 @@ export function LectioScreen({
     return data.id as string;
   }
 
+  /** Avança e registra o passo como rezado, com ou sem texto escrito. */
+  function next() {
+    update({ steps_done: Math.max(entry?.steps_done ?? 0, step + 1) });
+    setStep(step + 1);
+  }
+
   function update(patch: Partial<Entry>) {
     dirty.current = true;
     setEntry((prev) => ({ ...(prev ?? EMPTY), ...patch }));
@@ -183,9 +193,9 @@ export function LectioScreen({
   async function finish() {
     if (!entry) return;
     const completed_at = new Date().toISOString();
-    const id = await save(entry, { completed_at });
+    const id = await save(entry, { completed_at, steps_done: 4 });
     if (!id) return;
-    setEntry({ ...entry, completed_at });
+    setEntry({ ...entry, completed_at, steps_done: 4 });
     // Liga a lectio ao trecho da Bíblia, para aparecer em "Ver anotações ligadas".
     const ref = reference ? parseReference(reference, books) : null;
     await supabase.from("bible_links").delete().eq("source_type", "lectio").eq("source_id", id);
@@ -279,8 +289,8 @@ export function LectioScreen({
             rows={step === 0 ? 2 : 7}
             placeholder={
               step === 0
-                ? "Escreva ou selecione no texto e toque em Marcar"
-                : "Escreva com as suas palavras (pode usar o microfone do teclado)"
+                ? "Opcional: escreva ou selecione no texto e toque em Marcar"
+                : "Opcional: escreva com as suas palavras, ou apenas reze e siga"
             }
             className="reading mt-3 w-full rounded-[20px] bg-card p-4 shadow-card outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-ring"
           />
@@ -298,7 +308,7 @@ export function LectioScreen({
               </Button>
             )}
             {step < 3 ? (
-              <Button size="lg" className="flex-1" onClick={() => setStep(step + 1)}>
+              <Button size="lg" className="flex-1" onClick={next}>
                 Próximo passo <ArrowRight />
               </Button>
             ) : (
@@ -321,6 +331,11 @@ export function LectioScreen({
                   <p className="reading mt-1 whitespace-pre-wrap">{entry[s.key]}</p>
                 </div>
               ) : null,
+            )}
+            {!STEPS.some((s) => entry[s.key]?.trim()) && (
+              <p className="reading mt-3 text-muted-foreground">
+                Rezada em silêncio, sem anotações.
+              </p>
             )}
           </Card>
           <Button variant="secondary" size="lg" onClick={() => setStep(0)}>

@@ -5,8 +5,15 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Highlighter, Minus, Plus, Search, X } from "lucide-react";
 import { ListGroup, Row, rowClass, ScreenHeader, VerseNumber } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
+import { StudySwitch } from "@/features/catecismo/StudySwitch";
 import { booksQueryOptions } from "./queries";
-import { formatLinkRef, formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
+import {
+  formatLinkRef,
+  formatRef,
+  parseReference,
+  type BookLite,
+  type ParsedReference,
+} from "./reference";
 
 type View =
   | { name: "home" }
@@ -23,7 +30,13 @@ type LinkedItem = {
   date: string | null;
   ref: string;
 };
-type SearchResult = { book_id: number; chapter: number; verse: number; text: string; book_name: string };
+type SearchResult = {
+  book_id: number;
+  chapter: number;
+  verse: number;
+  text: string;
+  book_name: string;
+};
 
 export const HIGHLIGHTS = [
   { value: "amarelo", label: "Amarelo", className: "hl-amarelo" },
@@ -73,7 +86,9 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
       return;
     }
     if (term.length < 3) {
-      setSearchError("Escreva uma referência (ex.: 2Tm 3,14-17) ou pelo menos 3 letras para buscar palavras.");
+      setSearchError(
+        "Escreva uma referência (ex.: 2Tm 3,14-17) ou pelo menos 3 letras para buscar palavras.",
+      );
       return;
     }
     setSearching(true);
@@ -150,9 +165,10 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
   return (
     <section>
       <ScreenHeader title="Bíblia" subtitle="Tradução Ave-Maria" />
+      <StudySwitch value="biblia" />
 
       <form
-        className="flex gap-2"
+        className="mt-5 flex gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           void runSearch();
@@ -184,8 +200,14 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
           {results.map((r) => {
             const book = books.find((b) => b.id === r.book_id);
             return (
-              <button key={`${r.book_id}-${r.chapter}-${r.verse}`} onClick={() => openResult(r)} className={`${rowClass} block`}>
-                <span className="text-[15px] font-semibold text-primary">{book ? formatRef(book, r.chapter, r.verse) : ""}</span>
+              <button
+                key={`${r.book_id}-${r.chapter}-${r.verse}`}
+                onClick={() => openResult(r)}
+                className={`${rowClass} block`}
+              >
+                <span className="text-[15px] font-semibold text-primary">
+                  {book ? formatRef(book, r.chapter, r.verse) : ""}
+                </span>
                 <span className="mt-0.5 block font-serif text-base leading-snug">
                   {r.text.length > 140 ? `${r.text.slice(0, 140)}…` : r.text}
                 </span>
@@ -202,19 +224,32 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
       </ListGroup>
 
       {booksQuery.isLoading && <p className="mt-6 text-muted-foreground">Carregando livros…</p>}
-      {booksQuery.isError && <p className="mt-6 text-muted-foreground">Não consegui carregar os livros. Recarregue a página.</p>}
+      {booksQuery.isError && (
+        <p className="mt-6 text-muted-foreground">
+          Não consegui carregar os livros. Recarregue a página.
+        </p>
+      )}
 
       {(["antigo", "novo"] as const).map((testament) => {
         const list = books.filter((b) => b.testament === testament);
         if (list.length === 0) return null;
         return (
-          <ListGroup key={testament} title={testament === "antigo" ? "Antigo Testamento" : "Novo Testamento"} className="mt-7">
+          <ListGroup
+            key={testament}
+            title={testament === "antigo" ? "Antigo Testamento" : "Novo Testamento"}
+            className="mt-7"
+          >
             {list.map((b) => (
-              <button key={b.id} onClick={() => setView({ name: "chapters", book: b })} className={rowClass}>
+              <button
+                key={b.id}
+                onClick={() => setView({ name: "chapters", book: b })}
+                className={rowClass}
+              >
                 <Row
                   title={
                     <>
-                      {b.name} <span className="text-[15px] text-muted-foreground">{b.abbreviation}</span>
+                      {b.name}{" "}
+                      <span className="text-[15px] text-muted-foreground">{b.abbreviation}</span>
                     </>
                   }
                   chevron
@@ -230,7 +265,10 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
 
 function BackButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className="pressable -ml-2 flex h-10 items-center gap-0.5 pr-3 text-[17px] text-primary">
+    <button
+      onClick={onClick}
+      className="pressable -ml-2 flex h-10 items-center gap-0.5 pr-3 text-[17px] text-primary"
+    >
       <ChevronLeft className="h-6 w-6" /> {children}
     </button>
   );
@@ -294,7 +332,11 @@ function ReadingView({
   }, [marksQuery.data, chapter]);
 
   const saveMark = useMutation({
-    mutationFn: async (patch: { verse: number; highlight?: string | null; note?: string | null }) => {
+    mutationFn: async (patch: {
+      verse: number;
+      highlight?: string | null;
+      note?: string | null;
+    }) => {
       // Só envia o campo alterado: o upsert atualiza apenas as colunas presentes,
       // então salvar o destaque não apaga a nota (e vice-versa).
       const { error } = await supabase.from("verse_marks").upsert(
@@ -350,10 +392,18 @@ function ReadingView({
           {book.name} {chapter}
         </span>
         <div className="flex items-center">
-          <button onClick={() => changeFontSize(-1)} className="pressable rounded-full p-2" aria-label="Diminuir letra">
+          <button
+            onClick={() => changeFontSize(-1)}
+            className="pressable rounded-full p-2"
+            aria-label="Diminuir letra"
+          >
             <Minus className="h-4 w-4" />
           </button>
-          <button onClick={() => changeFontSize(1)} className="pressable rounded-full p-2" aria-label="Aumentar letra">
+          <button
+            onClick={() => changeFontSize(1)}
+            className="pressable rounded-full p-2"
+            aria-label="Aumentar letra"
+          >
             <Plus className="h-4 w-4" />
           </button>
           <button
@@ -368,12 +418,18 @@ function ReadingView({
       </div>
 
       {versesQuery.isLoading && <p className="mt-6 text-muted-foreground">Carregando capítulo…</p>}
-      {versesQuery.isError && <p className="mt-6 text-muted-foreground">Não consegui carregar o texto. Recarregue a página.</p>}
+      {versesQuery.isError && (
+        <p className="mt-6 text-muted-foreground">
+          Não consegui carregar o texto. Recarregue a página.
+        </p>
+      )}
 
       <div className="mt-5 font-serif leading-[1.7]" style={{ fontSize: `${fontSize}px` }}>
         {verses.map((v) => {
           const mark = markMap.get(v.verse);
-          const hlClass = mark?.highlight ? HIGHLIGHTS.find((h) => h.value === mark.highlight)?.className : undefined;
+          const hlClass = mark?.highlight
+            ? HIGHLIGHTS.find((h) => h.value === mark.highlight)?.className
+            : undefined;
           const isFlash = flash && v.verse >= flash.from && v.verse <= flash.to;
           return (
             <p
@@ -387,7 +443,11 @@ function ReadingView({
             >
               <VerseNumber n={v.verse} />
               {v.text}
-              {mark?.note && <span className="ml-1 align-super font-sans text-[0.6em] text-muted-foreground">✎</span>}
+              {mark?.note && (
+                <span className="ml-1 align-super font-sans text-[0.6em] text-muted-foreground">
+                  ✎
+                </span>
+              )}
             </p>
           );
         })}
@@ -474,10 +534,13 @@ function VerseSheet({
       return;
     }
     const rows = (data ?? []).filter(
-      (l) => l.verse_start === null || (l.verse_start <= verse && (l.verse_end ?? l.verse_start) >= verse),
+      (l) =>
+        l.verse_start === null ||
+        (l.verse_start <= verse && (l.verse_end ?? l.verse_start) >= verse),
     );
     // Busca o título de cada reflexão e a data de cada lectio, para abrir com um toque.
-    const idsOf = (type: string) => rows.filter((l) => l.source_type === type).map((l) => l.source_id);
+    const idsOf = (type: string) =>
+      rows.filter((l) => l.source_type === type).map((l) => l.source_id);
     const [refl, lect] = await Promise.all([
       idsOf("reflexao").length
         ? supabase.from("reflections").select("id, title").in("id", idsOf("reflexao"))
@@ -496,7 +559,10 @@ function VerseSheet({
         title:
           titles.get(l.source_id) ??
           (dates.has(l.source_id)
-            ? new Date(dates.get(l.source_id)! + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
+            ? new Date(dates.get(l.source_id)! + "T12:00:00").toLocaleDateString("pt-BR", {
+                day: "numeric",
+                month: "long",
+              })
             : ""),
         date: dates.get(l.source_id) ?? null,
         ref: formatLinkRef(book, chapter, l.verse_start, l.verse_end),
@@ -513,7 +579,11 @@ function VerseSheet({
         <span className="mx-auto mb-3 block h-1.5 w-10 rounded-full bg-border" aria-hidden />
         <div className="flex items-center justify-between">
           <h2 className="title">{formatRef(book, chapter, verse)}</h2>
-          <button onClick={onClose} aria-label="Fechar" className="pressable rounded-full bg-secondary p-1.5 text-muted-foreground">
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="pressable rounded-full bg-secondary p-1.5 text-muted-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>

@@ -1,4 +1,4 @@
-import type { QueryClient } from "@tanstack/react-query";
+import { defaultShouldDehydrateQuery, type QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import {
   Outlet,
@@ -68,9 +68,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Caminho — catequese e lectio divina" },
-      { name: "description", content: "Aulas de catequese, Bíblia, lectio divina diária e reflexões em um só lugar." },
+      {
+        name: "description",
+        content: "Aulas de catequese, Bíblia, lectio divina diária e reflexões em um só lugar.",
+      },
       { property: "og:title", content: "Caminho — catequese e lectio divina" },
-      { property: "og:description", content: "Aulas de catequese, Bíblia, lectio divina diária e reflexões em um só lugar." },
+      {
+        property: "og:description",
+        content: "Aulas de catequese, Bíblia, lectio divina diária e reflexões em um só lugar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "theme-color", content: "#f6f2e9", media: "(prefers-color-scheme: light)" },
@@ -126,7 +132,16 @@ function RootComponent() {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister: idbPersister, maxAge: PERSIST_MAX_AGE, buster: "1" }}
+      persistOptions={{
+        persister: idbPersister,
+        maxAge: PERSIST_MAX_AGE,
+        buster: "1",
+        // O Catecismo (1,6 MB) fica no service worker, não no cache regravado a cada mudança.
+        dehydrateOptions: {
+          shouldDehydrateQuery: (q) =>
+            defaultShouldDehydrateQuery(q) && q.queryKey[0] !== "catecismo",
+        },
+      }}
     >
       <Outlet />
       <Toaster />

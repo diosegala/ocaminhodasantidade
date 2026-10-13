@@ -10,6 +10,7 @@ type PendingLectio = {
   prayer: string | null;
   contemplation: string | null;
   completed_at: string | null;
+  steps_done?: number;
   _unsynced?: boolean;
 };
 
@@ -18,11 +19,9 @@ type PendingLectio = {
  * aparelho), mesmo que a tela de origem não seja aberta de novo.
  */
 export async function syncPending(queryClient: QueryClient) {
-  const pending = queryClient
-    .getQueryCache()
-    .findAll({
-      predicate: (q) => (q.state.data as { _unsynced?: boolean } | null)?._unsynced === true,
-    });
+  const pending = queryClient.getQueryCache().findAll({
+    predicate: (q) => (q.state.data as { _unsynced?: boolean } | null)?._unsynced === true,
+  });
 
   for (const query of pending) {
     const [kind, key] = query.queryKey as [string, string];
@@ -52,6 +51,7 @@ export async function syncPending(queryClient: QueryClient) {
           prayer: e.prayer,
           contemplation: e.contemplation,
           completed_at: e.completed_at,
+          steps_done: e.steps_done ?? 0,
         },
         { onConflict: "user_id,date" },
       );

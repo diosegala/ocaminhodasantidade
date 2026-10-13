@@ -35,4 +35,15 @@ describe("trilha do dia", () => {
       true,
     ]);
   });
+
+  it("acende os passos rezados sem texto", () => {
+    expect(stationsDone({ ...empty, steps_done: 2 }, false)).toEqual([
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
 });

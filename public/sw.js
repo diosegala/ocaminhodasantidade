@@ -1,9 +1,10 @@
 // Service worker do Caminho: guarda o app no aparelho para abrir sem internet.
 // Os dados (Bíblia, liturgia, lectios) ficam no IndexedDB, pelo React Query.
 // Mude VERSION só quando a lógica deste arquivo mudar.
-const VERSION = "v2";
+const VERSION = "v3";
 const SHELL = `shell-${VERSION}`;
 const ASSETS = "assets";
+const DATA = "data";
 const MAX_ASSETS = 200;
 const NAV_TIMEOUT_MS = 4000;
 
@@ -43,6 +44,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(navigate(req));
   } else if (url.origin === self.location.origin && url.pathname.startsWith("/assets/")) {
     event.respondWith(cacheFirst(req));
+  } else if (url.origin === self.location.origin && url.pathname === "/catecismo.json") {
+    event.respondWith(dataFirst(req));
   }
   // O resto (Supabase, funções do servidor) vai direto para a rede.
 });
@@ -75,6 +78,23 @@ async function cacheFirst(req) {
   if (res.ok) {
     await cache.put(req, res.clone());
     void trim(cache);
+  }
+  return res;
+}
+
+// Dados grandes e estáveis (Catecismo): guardados após o primeiro uso. O endereço leva
+// "?v=N"; ao mudar a versão, a cópia antiga do mesmo arquivo é apagada.
+async function dataFirst(req) {
+  const cache = await caches.open(DATA);
+  const cached = await cache.match(req);
+  if (cached) return cached;
+  const res = await fetch(req);
+  if (res.ok) {
+    const path = new URL(req.url).pathname;
+    for (const key of await cache.keys()) {
+      if (new URL(key.url).pathname === path) await cache.delete(key);
+    }
+    await cache.put(req, res.clone());
   }
   return res;
 }

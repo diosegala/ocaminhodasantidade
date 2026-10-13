@@ -4,6 +4,7 @@ import { BookOpen, CloudOff, GraduationCap, NotebookPen, Sunrise } from "lucide-
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { syncPending } from "@/lib/sync-pending";
+import { reserveLiturgyOnce } from "@/features/lectio/liturgy-reserve";
 
 const tabs = [
   { to: "/", label: "Hoje", icon: Sunrise },
@@ -18,6 +19,7 @@ const WARM_ROUTES = [
   "/aulas",
   "/biblia",
   "/biblia/destaques",
+  "/biblia/catecismo",
   "/reflexoes",
   "/lectio",
   "/caminho",
@@ -51,6 +53,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Envia o que foi escrito offline assim que o cache do aparelho é lido e há internet.
   useEffect(() => {
     if (online && !restoring) void syncPending(queryClient);
+  }, [online, restoring, queryClient]);
+
+  // Uma vez por dia: guarda a liturgia da próxima semana no banco e no aparelho.
+  useEffect(() => {
+    if (online && !restoring) void reserveLiturgyOnce(queryClient);
   }, [online, restoring, queryClient]);
 
   useEffect(() => {

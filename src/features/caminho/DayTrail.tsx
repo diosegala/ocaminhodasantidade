@@ -17,6 +17,7 @@ type LectioToday = {
   prayer: string | null;
   contemplation: string | null;
   completed_at: string | null;
+  steps_done?: number | null;
 } | null;
 
 type Station = { title: string; hint: string; icon: LucideIcon; optional?: boolean };
@@ -42,8 +43,10 @@ const R = 30;
 export function stationsDone(entry: LectioToday, reflectedToday: boolean): boolean[] {
   const filled = FIELDS.map((f) => !!entry?.[f]?.trim());
   const completed = !!entry?.completed_at;
-  // Um passo conta como feito se ele ou algum passo seguinte já tem texto.
-  const lectio = FIELDS.map((_, i) => completed || filled.slice(i).some(Boolean));
+  const steps = entry?.steps_done ?? 0;
+  // Um passo conta como feito se foi rezado (mesmo sem escrever) ou se ele, ou algum
+  // passo seguinte, já tem texto.
+  const lectio = FIELDS.map((_, i) => completed || i < steps || filled.slice(i).some(Boolean));
   return [...lectio, completed, reflectedToday];
 }
 
