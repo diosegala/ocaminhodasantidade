@@ -22,13 +22,32 @@ type Entry = {
   _unsynced?: boolean;
 };
 
-const EMPTY: Entry = { reference: null, reading_mark: null, meditation: null, prayer: null, contemplation: null, completed_at: null };
+const EMPTY: Entry = {
+  reference: null,
+  reading_mark: null,
+  meditation: null,
+  prayer: null,
+  contemplation: null,
+  completed_at: null,
+};
 
 const STEPS = [
-  { key: "reading_mark", title: "Leitura", question: "Leia com calma. Qual palavra ou frase chamou a sua atenção?" },
+  {
+    key: "reading_mark",
+    title: "Leitura",
+    question: "Leia com calma. Qual palavra ou frase chamou a sua atenção?",
+  },
   { key: "meditation", title: "Meditação", question: "O que o texto me diz?" },
-  { key: "prayer", title: "Oração", question: "O que este texto me leva a pedir, agradecer ou louvar?" },
-  { key: "contemplation", title: "Contemplação", question: "O que este texto me leva a ser e a fazer?" },
+  {
+    key: "prayer",
+    title: "Oração",
+    question: "O que este texto me leva a pedir, agradecer ou louvar?",
+  },
+  {
+    key: "contemplation",
+    title: "Contemplação",
+    question: "O que este texto me leva a ser e a fazer?",
+  },
 ] as const;
 
 export function useBooks() {
@@ -44,7 +63,14 @@ export function useLiturgy(date: string) {
   });
 }
 
-export function LectioScreen({ date }: { date: string }) {
+/** `initialStep` (0–3) abre direto num passo, vindo da trilha do dia na Hoje. */
+export function LectioScreen({
+  date,
+  initialStep,
+}: {
+  date: string;
+  initialStep?: number | undefined;
+}) {
   const queryClient = useQueryClient();
   const liturgyQ = useLiturgy(date);
   const booksQ = useBooks();
@@ -53,14 +79,18 @@ export function LectioScreen({ date }: { date: string }) {
   const entryQ = useQuery({
     queryKey: ["lectio", date],
     queryFn: async () => {
-      const { data, error } = await supabase.from("lectio_entries").select("*").eq("date", date).maybeSingle();
+      const { data, error } = await supabase
+        .from("lectio_entries")
+        .select("*")
+        .eq("date", date)
+        .maybeSingle();
       if (error) throw error;
       return data as Entry | null;
     },
   });
 
   const [entry, setEntry] = useState<Entry | null>(null);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(initialStep ?? 0);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const dirty = useRef(false);
   const entryRef = useRef(entry);
@@ -74,12 +104,13 @@ export function LectioScreen({ date }: { date: string }) {
     const initial = entryQ.data ?? EMPTY;
     if (initial._unsynced) dirty.current = true;
     setEntry(initial);
-    if (initial.completed_at) setStep(4);
+    if (initial.completed_at && initialStep === undefined) setStep(4);
   }, [entryQ.data, entryQ.fetchStatus, entry]);
 
   const liturgy = liturgyQ.data?.liturgy ?? null;
   const readings = liturgy?.readings ?? [];
-  const reference = entry?.reference ?? readings.find((r) => r.kind === "evangelho")?.referencia ?? null;
+  const reference =
+    entry?.reference ?? readings.find((r) => r.kind === "evangelho")?.referencia ?? null;
   const liturgyReading = readings.find((r) => r.referencia === reference) ?? null;
 
   // Autosave com pequena espera. Antes, guarda no cache (que fica no aparelho),
@@ -174,7 +205,11 @@ export function LectioScreen({ date }: { date: string }) {
     );
   }
 
-  const dateLabel = new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  const dateLabel = new Date(date + "T12:00:00").toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <section>
@@ -213,9 +248,16 @@ export function LectioScreen({ date }: { date: string }) {
           )}
           {step > 0 && reference && (
             <details className="rounded-[20px] bg-card px-5 py-4 shadow-card">
-              <summary className="cursor-pointer text-[15px] text-primary">Reler o texto · {reference}</summary>
+              <summary className="cursor-pointer text-[15px] text-primary">
+                Reler o texto · {reference}
+              </summary>
               <div className="mt-3">
-                <PassageText reading={liturgyReading} reference={reference} books={books} mark={entry.reading_mark ?? ""} />
+                <PassageText
+                  reading={liturgyReading}
+                  reference={reference}
+                  books={books}
+                  mark={entry.reading_mark ?? ""}
+                />
               </div>
             </details>
           )}
@@ -228,13 +270,23 @@ export function LectioScreen({ date }: { date: string }) {
             value={(entry[STEPS[step].key] as string | null) ?? ""}
             onChange={(e) => update({ [STEPS[step]!.key]: e.target.value } as Partial<Entry>)}
             rows={step === 0 ? 2 : 7}
-            placeholder={step === 0 ? "Escreva ou selecione no texto e toque em Marcar" : "Escreva com as suas palavras (pode usar o microfone do teclado)"}
+            placeholder={
+              step === 0
+                ? "Escreva ou selecione no texto e toque em Marcar"
+                : "Escreva com as suas palavras (pode usar o microfone do teclado)"
+            }
             className="reading mt-3 w-full rounded-[20px] bg-card p-4 shadow-card outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-ring"
           />
 
           <div className="mt-5 flex gap-3">
             {step > 0 && (
-              <Button variant="secondary" size="lg" className="w-auto" onClick={() => setStep(step - 1)} aria-label="Passo anterior">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-auto"
+                onClick={() => setStep(step - 1)}
+                aria-label="Passo anterior"
+              >
                 <ArrowLeft />
               </Button>
             )}
@@ -284,8 +336,14 @@ function StepProgress({ step, onPick }: { step: number; onPick: (n: number) => v
     <ol className="flex gap-1.5">
       {STEPS.map((s, i) => (
         <li key={s.key} className="flex-1">
-          <button onClick={() => onPick(i)} aria-label={`Ir para ${s.title}`} className="block w-full py-2">
-            <span className={`block h-1.5 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-secondary"}`} />
+          <button
+            onClick={() => onPick(i)}
+            aria-label={`Ir para ${s.title}`}
+            className="block w-full py-2"
+          >
+            <span
+              className={`block h-1.5 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-secondary"}`}
+            />
           </button>
         </li>
       ))}
@@ -306,7 +364,9 @@ function TextChooser(props: {
     <div className="mt-3 space-y-3">
       {props.fromCacheOfDate && (
         <p className="rounded-2xl bg-secondary p-4 text-[15px]">
-          Não consegui buscar a liturgia de hoje. Mostrando a do dia {props.fromCacheOfDate.split("-").reverse().join("/")}. Você pode escolher outro trecho abaixo.
+          Não consegui buscar a liturgia de hoje. Mostrando a do dia{" "}
+          {props.fromCacheOfDate.split("-").reverse().join("/")}. Você pode escolher outro trecho
+          abaixo.
         </p>
       )}
       {props.liturgyFailed && (
@@ -317,7 +377,11 @@ function TextChooser(props: {
       {props.readings.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {props.readings.map((r) => (
-            <Chip key={r.kind} active={props.reference === r.referencia} onClick={() => props.onReference(r.referencia)}>
+            <Chip
+              key={r.kind}
+              active={props.reference === r.referencia}
+              onClick={() => props.onReference(r.referencia)}
+            >
               {r.label}
             </Chip>
           ))}
@@ -352,7 +416,9 @@ function highlight(text: string, mark: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="hl-amarelo rounded px-0.5 text-inherit">{text.slice(idx, idx + m.length)}</mark>
+      <mark className="hl-amarelo rounded px-0.5 text-inherit">
+        {text.slice(idx, idx + m.length)}
+      </mark>
       {text.slice(idx + m.length)}
     </>
   );
@@ -366,7 +432,8 @@ function PassageText(props: {
   onMark?: (m: string) => void;
 }) {
   const parsed = useMemo(
-    () => (props.reference && props.books.length ? parseReference(props.reference, props.books) : null),
+    () =>
+      props.reference && props.books.length ? parseReference(props.reference, props.books) : null,
     [props.reference, props.books],
   );
 
@@ -374,8 +441,13 @@ function PassageText(props: {
     enabled: !props.reading && !!parsed,
     queryKey: ["lectio-passage", props.reference],
     queryFn: async () => {
-      let q = supabase.from("bible_verses").select("verse, text").eq("book_id", parsed!.book.id).eq("chapter", parsed!.chapter);
-      if (parsed!.verseStart) q = q.gte("verse", parsed!.verseStart).lte("verse", parsed!.verseEnd ?? parsed!.verseStart);
+      let q = supabase
+        .from("bible_verses")
+        .select("verse, text")
+        .eq("book_id", parsed!.book.id)
+        .eq("chapter", parsed!.chapter);
+      if (parsed!.verseStart)
+        q = q.gte("verse", parsed!.verseStart).lte("verse", parsed!.verseEnd ?? parsed!.verseStart);
       const { data, error } = await q.order("verse");
       if (error) throw error;
       return data;
@@ -401,14 +473,26 @@ function PassageText(props: {
   if (props.reading) {
     body = (
       <>
-        {props.reading.titulo && <p className="text-[15px] italic text-muted-foreground">{props.reading.titulo}</p>}
-        {props.reading.refrao && <p className="reading mt-2 font-semibold">{props.reading.refrao}</p>}
-        <p className="reading mt-3 whitespace-pre-wrap">{highlight(props.reading.texto, props.mark)}</p>
-        <p className="mt-3 text-xs text-muted-foreground">Texto da liturgia (CNBB), como foi publicado.</p>
+        {props.reading.titulo && (
+          <p className="text-[15px] italic text-muted-foreground">{props.reading.titulo}</p>
+        )}
+        {props.reading.refrao && (
+          <p className="reading mt-2 font-semibold">{props.reading.refrao}</p>
+        )}
+        <p className="reading mt-3 whitespace-pre-wrap">
+          {highlight(props.reading.texto, props.mark)}
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Texto da liturgia (CNBB), como foi publicado.
+        </p>
       </>
     );
   } else if (!parsed) {
-    body = <p className="text-muted-foreground">Não reconheci essa referência. Tente algo como "Jo 15,1-8".</p>;
+    body = (
+      <p className="text-muted-foreground">
+        Não reconheci essa referência. Tente algo como "Jo 15,1-8".
+      </p>
+    );
   } else if (versesQ.isLoading) {
     body = <p className="text-muted-foreground">Carregando o texto…</p>;
   } else if (!versesQ.data?.length) {
@@ -428,7 +512,12 @@ function PassageText(props: {
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         {bibleLink}
         {props.onMark && (
-          <Button variant="secondary" size="sm" className="h-9 rounded-full px-3.5 text-[15px]" onClick={markSelection}>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-9 rounded-full px-3.5 text-[15px]"
+            onClick={markSelection}
+          >
             <Highlighter /> Marcar seleção
           </Button>
         )}
