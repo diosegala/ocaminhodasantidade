@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Highlighter, Minus, Plus, Search, X } from "lucide-react";
-import { ListGroup, Row, rowClass, ScreenHeader } from "@/components/app/ui";
+import { ListGroup, Row, rowClass, ScreenHeader, VerseNumber } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { booksQueryOptions } from "./queries";
 import { formatLinkRef, formatRef, parseReference, type BookLite, type ParsedReference } from "./reference";
@@ -385,7 +385,7 @@ function ReadingView({
               onClick={() => setSelectedVerse(v.verse)}
               role="button"
             >
-              <span className="mr-1 align-super font-sans text-[0.6em] font-medium text-muted-foreground">{v.verse}</span>
+              <VerseNumber n={v.verse} />
               {v.text}
               {mark?.note && <span className="ml-1 align-super font-sans text-[0.6em] text-muted-foreground">✎</span>}
             </p>

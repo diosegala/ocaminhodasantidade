@@ -7,7 +7,14 @@ import { parseReference, type BookLite } from "@/features/biblia/reference";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { getLiturgy } from "./liturgy.functions";
 import type { Reading } from "./liturgy";
-import { Card, Chip, SaveBadge, ScreenHeader, type SaveState } from "@/components/app/ui";
+import {
+  Card,
+  Chip,
+  SaveBadge,
+  ScreenHeader,
+  VerseNumber,
+  type SaveState,
+} from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 
 type Entry = {
@@ -500,7 +507,12 @@ function PassageText(props: {
   } else {
     body = (
       <p className="reading">
-        {highlight(versesQ.data.map((v) => `${v.verse} ${v.text}`).join(" "), props.mark)}
+        {versesQ.data.map((v) => (
+          <span key={v.verse}>
+            <VerseNumber n={v.verse} />
+            {highlight(v.text, props.mark)}{" "}
+          </span>
+        ))}
       </p>
     );
   }

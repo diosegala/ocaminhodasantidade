@@ -190,3 +190,12 @@ export type SaveState = keyof typeof SAVE_LABELS;
 export function SaveBadge({ state }: { state: SaveState }) {
   return <span className="text-[13px] text-muted-foreground">{SAVE_LABELS[state]}</span>;
 }
+
+/** Número do versículo: pequeno, elevado e discreto, para não competir com o texto. */
+export function VerseNumber({ n }: { n: number }) {
+  return (
+    <sup className="mr-1 font-sans text-[0.55em] font-semibold text-muted-foreground/80 select-none">
+      {n}
+    </sup>
+  );
+}
