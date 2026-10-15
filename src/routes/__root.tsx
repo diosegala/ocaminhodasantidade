@@ -16,6 +16,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { idbPersister, PERSIST_MAX_AGE } from "@/lib/query-persister";
+// Registra cedo o aviso de instalação do Android (beforeinstallprompt).
+import "@/components/app/InstallApp";
 
 function NotFoundComponent() {
   return (

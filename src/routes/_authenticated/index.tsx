@@ -1,13 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Flame, Route as RouteIcon } from "lucide-react";
+import { Flame, Route as RouteIcon, Smartphone, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { computeStreak, localToday } from "@/features/lectio/liturgy";
 import { useLiturgy } from "@/features/lectio/LectioScreen";
 import { lectioHistoryQueryOptions } from "@/features/lectio/queries";
 import { reflectionsQueryOptions } from "@/features/reflexoes/queries";
 import { DayTrail } from "@/features/caminho/DayTrail";
+import { InstallApp } from "@/components/app/InstallApp";
+import { Button } from "@/components/ui/button";
 import {
   computeMilestones,
   markSeen,
@@ -81,6 +83,7 @@ function Hoje() {
   return (
     <section>
       <ScreenHeader title="Hoje" subtitle={todayLabel} />
+      <InstallNotice />
 
       <Card className="relative overflow-hidden pt-6">
         <span className={`absolute inset-x-0 top-0 h-1.5 ${LIT_CLASSES[color].bg}`} aria-hidden />
@@ -153,4 +156,50 @@ function Hoje() {
 function localDate(timestamp: string) {
   const d = new Date(timestamp);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Aviso na Hoje enquanto o app é usado pelo navegador; some ao instalar ou ao fechar. */
+function InstallNotice() {
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return localStorage.getItem("aviso-instalar") === "fechado";
+    } catch {
+      return false;
+    }
+  });
+  if (hidden) return null;
+  return (
+    <InstallApp>
+      {(open) => (
+        <Card className="relative mb-5 flex items-center gap-3 pr-11">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
+            <Smartphone className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold">Instale o Caminho no celular</p>
+            <p className="text-[13px] text-muted-foreground">
+              Abre em tela cheia e funciona sem internet.
+            </p>
+          </div>
+          <Button size="sm" className="h-9 rounded-full px-3.5 text-[15px]" onClick={open}>
+            Instalar
+          </Button>
+          <button
+            onClick={() => {
+              setHidden(true);
+              try {
+                localStorage.setItem("aviso-instalar", "fechado");
+              } catch {
+                // sem armazenamento: volta a aparecer na próxima vez
+              }
+            }}
+            aria-label="Fechar aviso"
+            className="absolute right-2 top-2 rounded-full p-1.5 text-muted-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </Card>
+      )}
+    </InstallApp>
+  );
 }

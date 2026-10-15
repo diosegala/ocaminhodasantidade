@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordInput } from "@/components/app/PasswordInput";
 import { Button } from "@/components/ui/button";
+import { InstallButton } from "@/components/app/InstallApp";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -98,6 +99,8 @@ function AuthPage() {
             </button>
           )}
         </div>
+
+        <InstallButton className="mt-10" />
       </div>
     </div>
   );

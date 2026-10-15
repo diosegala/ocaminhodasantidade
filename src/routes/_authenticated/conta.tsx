@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Bell, Download, KeyRound, LogOut, Users, X } from "lucide-react";
+import { Bell, Download, KeyRound, LogOut, Smartphone, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { idbPersister } from "@/lib/query-persister";
@@ -9,6 +9,7 @@ import { getThemeMode, setThemeMode, type ThemeMode } from "@/lib/theme";
 import { ListGroup, Row, rowClass, ScreenHeader, SegmentedControl } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { buildExport, shareExport } from "@/features/conta/export";
+import { InstallApp } from "@/components/app/InstallApp";
 
 export const Route = createFileRoute("/_authenticated/conta")({
   head: () => ({
@@ -102,6 +103,13 @@ function ContaPage() {
       </ListGroup>
 
       <ListGroup className="mt-7">
+        <InstallApp>
+          {(open) => (
+            <button onClick={open} className={rowClass}>
+              <Row icon={Smartphone} title="Instalar no celular" chevron />
+            </button>
+          )}
+        </InstallApp>
         <button onClick={() => setShowReminder(true)} className={rowClass}>
           <Row icon={Bell} title="Lembrete diário" chevron />
         </button>
