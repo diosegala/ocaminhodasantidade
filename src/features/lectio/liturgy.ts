@@ -111,3 +111,45 @@ export function splitVerseNumbers(text: string): VerseSegment[] {
   parts.push({ verse, text: text.slice(last) });
   return parts.filter((p) => p.verse !== null || p.text);
 }
+
+/**
+ * Onde pintar a frase marcada, trecho a trecho, mesmo atravessando versículos. A frase
+ * vem da seleção da pessoa e pode trazer o número do versículo colado ("10Pois"); por
+ * isso ela passa pelo mesmo splitVerseNumbers. Ignora maiúsculas e espaços repetidos.
+ */
+export function markRanges(segments: VerseSegment[], mark: string): ([number, number] | null)[] {
+  const none = segments.map(() => null);
+  const target = splitVerseNumbers(mark.trim())
+    .map((s) => s.text)
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+  if (target.length < 2) return none;
+
+  // Texto corrido normalizado, lembrando a posição original de cada letra.
+  const plain = segments.map((s) => s.text).join("");
+  let norm = "";
+  const map: number[] = [];
+  for (let i = 0; i < plain.length; i++) {
+    const ch = plain[i]!;
+    if (/\s/.test(ch)) {
+      if (norm.endsWith(" ")) continue;
+      norm += " ";
+    } else norm += ch.toLowerCase();
+    map.push(i);
+  }
+  const at = norm.indexOf(target);
+  if (at < 0) return none;
+  const start = map[at]!;
+  const end = map[at + target.length - 1]! + 1;
+
+  let offset = 0;
+  return segments.map((s) => {
+    const from = Math.max(start, offset);
+    const to = Math.min(end, offset + s.text.length);
+    const range: [number, number] | null = from < to ? [from - offset, to - offset] : null;
+    offset += s.text.length;
+    return range;
+  });
+}

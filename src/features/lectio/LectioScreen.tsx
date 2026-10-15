@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseReference, type BookLite } from "@/features/biblia/reference";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { getLiturgy } from "./liturgy.functions";
-import { splitVerseNumbers, type Reading } from "./liturgy";
+import { markRanges, splitVerseNumbers, type Reading, type VerseSegment } from "./liturgy";
 import {
   Card,
   Chip,
@@ -430,18 +430,30 @@ function TextChooser(props: {
   );
 }
 
-function highlight(text: string, mark: string) {
-  const m = mark.trim();
-  if (m.length < 2) return text;
-  const idx = text.toLowerCase().indexOf(m.toLowerCase());
-  if (idx < 0) return text;
+/** Texto em trechos por versículo, com o número pequeno e a frase marcada em amarelo. */
+function MarkedVerses({ segments, mark }: { segments: VerseSegment[]; mark: string }) {
+  const ranges = markRanges(segments, mark);
   return (
     <>
-      {text.slice(0, idx)}
-      <mark className="hl-amarelo rounded px-0.5 text-inherit">
-        {text.slice(idx, idx + m.length)}
-      </mark>
-      {text.slice(idx + m.length)}
+      {segments.map((seg, i) => {
+        const r = ranges[i];
+        return (
+          <span key={i}>
+            {seg.verse !== null && <VerseNumber n={seg.verse} />}
+            {r ? (
+              <>
+                {seg.text.slice(0, r[0])}
+                <mark className="hl-amarelo rounded px-0.5 text-inherit">
+                  {seg.text.slice(r[0], r[1])}
+                </mark>
+                {seg.text.slice(r[1])}
+              </>
+            ) : (
+              seg.text
+            )}
+          </span>
+        );
+      })}
     </>
   );
 }
@@ -476,9 +488,26 @@ function PassageText(props: {
     },
   });
 
+  // No iPhone, tocar no botão desfaz a seleção antes do clique. Por isso o trecho é
+  // guardado enquanto a pessoa seleciona, e o botão usa o que ficou guardado.
+  const articleRef = useRef<HTMLElement>(null);
+  const [selected, setSelected] = useState("");
+  useEffect(() => {
+    if (!props.onMark) return;
+    const onChange = () => {
+      const sel = window.getSelection();
+      const text = sel?.toString().replace(/\s+/g, " ").trim() ?? "";
+      if (text && sel?.anchorNode && articleRef.current?.contains(sel.anchorNode))
+        setSelected(text);
+    };
+    document.addEventListener("selectionchange", onChange);
+    return () => document.removeEventListener("selectionchange", onChange);
+  }, [props.onMark]);
+
   function markSelection() {
-    const s = window.getSelection()?.toString().trim();
-    if (s && props.onMark) props.onMark(s);
+    if (selected && props.onMark) props.onMark(selected);
+    setSelected("");
+    window.getSelection()?.removeAllRanges();
   }
 
   const bibleLink = parsed ? (
@@ -502,12 +531,7 @@ function PassageText(props: {
           <p className="reading mt-2 font-semibold">{props.reading.refrao}</p>
         )}
         <p className="reading mt-3 whitespace-pre-wrap">
-          {splitVerseNumbers(props.reading.texto).map((seg, i) => (
-            <span key={i}>
-              {seg.verse !== null && <VerseNumber n={seg.verse} />}
-              {highlight(seg.text, props.mark)}
-            </span>
-          ))}
+          <MarkedVerses segments={splitVerseNumbers(props.reading.texto)} mark={props.mark} />
         </p>
         <p className="mt-3 text-xs text-muted-foreground">
           Texto da liturgia (CNBB), como foi publicado.
@@ -527,30 +551,36 @@ function PassageText(props: {
   } else {
     body = (
       <p className="reading">
-        {versesQ.data.map((v) => (
-          <span key={v.verse}>
-            <VerseNumber n={v.verse} />
-            {highlight(v.text, props.mark)}{" "}
-          </span>
-        ))}
+        <MarkedVerses
+          segments={versesQ.data.map((v) => ({ verse: v.verse, text: `${v.text} ` }))}
+          mark={props.mark}
+        />
       </p>
     );
   }
 
   return (
-    <article>
+    <article ref={articleRef}>
       <h2 className="eyebrow">{props.reference}</h2>
       <div className="mt-2">{body}</div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         {bibleLink}
         {props.onMark && (
           <Button
-            variant="secondary"
+            variant={selected ? "default" : "secondary"}
             size="sm"
-            className="h-9 rounded-full px-3.5 text-[15px]"
+            className="h-9 max-w-full rounded-full px-3.5 text-[15px]"
             onClick={markSelection}
+            disabled={!selected}
+            // Não deixa o toque tirar o foco nem desfazer a seleção antes do clique.
+            onPointerDown={(e) => e.preventDefault()}
           >
-            <Highlighter /> Marcar seleção
+            <Highlighter />
+            <span className="truncate">
+              {selected
+                ? `Marcar “${selected.length > 28 ? `${selected.slice(0, 28)}…` : selected}”`
+                : "Selecione no texto para marcar"}
+            </span>
           </Button>
         )}
       </div>

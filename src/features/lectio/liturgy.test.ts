@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeStreak, normalizeLiturgy, splitVerseNumbers } from "./liturgy";
+import { computeStreak, markRanges, normalizeLiturgy, splitVerseNumbers } from "./liturgy";
 
 describe("normalizeLiturgy", () => {
   it("lê o formato da API principal (listas) e ignora segunda leitura vazia", () => {
@@ -80,5 +80,23 @@ describe("splitVerseNumbers", () => {
     expect(splitVerseNumbers("Jejuou 40 dias e 40 noites.")).toEqual([
       { verse: null, text: "Jejuou 40 dias e 40 noites." },
     ]);
+  });
+});
+
+describe("markRanges", () => {
+  const segs = splitVerseNumbers(
+    "Naquele tempo, 9Pedi e recebereis. 10Pois todo aquele que pede, recebe.",
+  );
+
+  it("acha a frase dentro de um versículo", () => {
+    expect(markRanges(segs, "pedi e recebereis")).toEqual([null, [0, 17], null]);
+  });
+
+  it("atravessa versículos, mesmo com o número colado na seleção", () => {
+    expect(markRanges(segs, "recebereis. 10Pois todo")).toEqual([null, [7, 19], [0, 9]]);
+  });
+
+  it("não marca nada quando a frase não está no texto", () => {
+    expect(markRanges(segs, "outra coisa")).toEqual([null, null, null]);
   });
 });
