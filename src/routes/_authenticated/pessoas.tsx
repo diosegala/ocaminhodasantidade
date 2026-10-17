@@ -218,6 +218,7 @@ function PersonRow({ person, onReset }: { person: Person; onReset: (s: Shared) =
       </div>
       <p className="text-[15px] text-muted-foreground">{person.email}</p>
       <p className="text-[15px] text-muted-foreground">{lastSeen}</p>
+      <p className="text-[15px] text-muted-foreground">{activityText(person.activity)}</p>
 
       {!person.isOwner &&
         (open ? (
@@ -252,6 +253,18 @@ function PersonRow({ person, onReset }: { person: Person; onReset: (s: Shared) =
         ))}
     </li>
   );
+}
+
+function activityText({ lectios, lastLectio, lessons }: Person["activity"]) {
+  if (!lectios && !lessons) return "Ainda não registrou lectio nem aula";
+  const parts = [
+    lectios === 1 ? "1 lectio" : `${lectios} lectios`,
+    lessons === 1 ? "1 aula" : `${lessons} aulas`,
+  ];
+  const last = lastLectio
+    ? ` · última lectio em ${new Date(lastLectio + "T12:00:00").toLocaleDateString("pt-BR")}`
+    : "";
+  return parts.join(", ") + last;
 }
 
 function errorMessage(e: unknown) {

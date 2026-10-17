@@ -1,5 +1,6 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { taggingsQueryOptions } from "@/features/ligacoes/queries";
 
 export type Reflection = {
   id: string;
@@ -11,7 +12,7 @@ export type Reflection = {
   _unsynced?: boolean;
 };
 
-export const SOURCE = "reflexao";
+export const SOURCE = "reflexao" as const;
 
 export const reflectionsQueryOptions = queryOptions({
   queryKey: ["reflections"],
@@ -25,26 +26,7 @@ export const reflectionsQueryOptions = queryOptions({
   },
 });
 
-export const tagsQueryOptions = queryOptions({
-  queryKey: ["tags"],
-  queryFn: async () => {
-    const { data, error } = await supabase.from("tags").select("id, name").order("name");
-    if (error) throw error;
-    return data;
-  },
-});
-
-export const reflectionTaggingsQueryOptions = queryOptions({
-  queryKey: ["taggings", SOURCE],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from("taggings")
-      .select("id, tag_id, source_id")
-      .eq("source_type", SOURCE);
-    if (error) throw error;
-    return data;
-  },
-});
+export const reflectionTaggingsQueryOptions = taggingsQueryOptions(SOURCE);
 
 /** Coloca a reflexão no topo da lista guardada, para ela aparecer mesmo antes de sincronizar. */
 export function putInList(queryClient: QueryClient, r: Reflection) {

@@ -5,11 +5,8 @@ import { NotebookPen, Plus, Search } from "lucide-react";
 import { stripAccents } from "@/features/biblia/reference";
 import { Chip, EmptyState, ScreenHeader } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
-import {
-  reflectionsQueryOptions,
-  reflectionTaggingsQueryOptions,
-  tagsQueryOptions,
-} from "./queries";
+import { tagsQueryOptions } from "@/features/ligacoes/queries";
+import { reflectionsQueryOptions, reflectionTaggingsQueryOptions } from "./queries";
 
 export function ReflectionsList() {
   const navigate = useNavigate();

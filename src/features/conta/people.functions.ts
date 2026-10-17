@@ -11,6 +11,8 @@ export type Person = {
   isOwner: boolean;
   mustChangePassword: boolean;
   lastSignInAt: string | null;
+  /** Só quantidade e data: o dono vê se a pessoa está usando, nunca o que ela escreveu. */
+  activity: { lectios: number; lastLectio: string | null; lessons: number };
 };
 
 type AuthContext = { userId: string; supabase: SupabaseClient<Database> };
@@ -37,11 +39,25 @@ export const listPeople = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<Person[]> => {
     await assertOwner(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: users, error }, { data: roles }] = await Promise.all([
-      supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 }),
-      supabaseAdmin.from("user_roles").select("user_id, role"),
-    ]);
+    const [{ data: users, error }, { data: roles }, { data: lectios }, { data: lessons }] =
+      await Promise.all([
+        supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 }),
+        supabaseAdmin.from("user_roles").select("user_id, role"),
+        supabaseAdmin.from("lectio_entries").select("user_id, date"),
+        supabaseAdmin.from("lessons").select("user_id"),
+      ]);
     if (error) throw new Error(error.message);
+    const activity = new Map<string, Person["activity"]>();
+    const activityOf = (id: string) => {
+      if (!activity.has(id)) activity.set(id, { lectios: 0, lastLectio: null, lessons: 0 });
+      return activity.get(id)!;
+    };
+    for (const l of lectios ?? []) {
+      const a = activityOf(l.user_id);
+      a.lectios++;
+      if (!a.lastLectio || l.date > a.lastLectio) a.lastLectio = l.date;
+    }
+    for (const l of lessons ?? []) activityOf(l.user_id).lessons++;
     const owners = new Set((roles ?? []).filter((r) => r.role === "owner").map((r) => r.user_id));
     return users.users
       .map((u) => ({
@@ -51,6 +67,7 @@ export const listPeople = createServerFn({ method: "GET" })
         isOwner: owners.has(u.id),
         mustChangePassword: !!u.user_metadata?.["must_change_password"],
         lastSignInAt: u.last_sign_in_at ?? null,
+        activity: activity.get(u.id) ?? { lectios: 0, lastLectio: null, lessons: 0 },
       }))
       .sort(
         (a, b) => Number(b.isOwner) - Number(a.isOwner) || a.name.localeCompare(b.name, "pt-BR"),

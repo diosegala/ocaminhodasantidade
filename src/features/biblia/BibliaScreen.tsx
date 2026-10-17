@@ -538,18 +538,24 @@ function VerseSheet({
         l.verse_start === null ||
         (l.verse_start <= verse && (l.verse_end ?? l.verse_start) >= verse),
     );
-    // Busca o título de cada reflexão e a data de cada lectio, para abrir com um toque.
+    // Busca o título de cada reflexão e aula e a data de cada lectio, para abrir com um toque.
     const idsOf = (type: string) =>
       rows.filter((l) => l.source_type === type).map((l) => l.source_id);
-    const [refl, lect] = await Promise.all([
+    const [refl, lect, aulas] = await Promise.all([
       idsOf("reflexao").length
         ? supabase.from("reflections").select("id, title").in("id", idsOf("reflexao"))
         : Promise.resolve({ data: [] as { id: string; title: string }[] }),
       idsOf("lectio").length
         ? supabase.from("lectio_entries").select("id, date").in("id", idsOf("lectio"))
         : Promise.resolve({ data: [] as { id: string; date: string }[] }),
+      idsOf("aula").length
+        ? supabase.from("lessons").select("id, theme").in("id", idsOf("aula"))
+        : Promise.resolve({ data: [] as { id: string; theme: string }[] }),
     ]);
-    const titles = new Map((refl.data ?? []).map((r) => [r.id, r.title.trim() || "Sem título"]));
+    const titles = new Map([
+      ...(refl.data ?? []).map((r) => [r.id, r.title.trim() || "Sem título"] as const),
+      ...(aulas.data ?? []).map((a) => [a.id, a.theme.trim() || "Sem tema"] as const),
+    ]);
     const dates = new Map((lect.data ?? []).map((r) => [r.id, r.date]));
     setLinks(
       rows.map((l, i) => ({
@@ -649,6 +655,10 @@ function VerseSheet({
               const cls = "flex items-center gap-3 px-4 py-3 text-[15px] active:bg-border/40";
               return l.type === "reflexao" ? (
                 <Link key={l.key} to="/reflexoes/$id" params={{ id: l.sourceId }} className={cls}>
+                  {content}
+                </Link>
+              ) : l.type === "aula" ? (
+                <Link key={l.key} to="/aulas/$id" params={{ id: l.sourceId }} className={cls}>
                   {content}
                 </Link>
               ) : l.type === "lectio" && l.date ? (

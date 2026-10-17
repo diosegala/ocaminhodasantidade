@@ -12,13 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedAulasRouteImport } from './routes/_authenticated/aulas'
 import { Route as AuthenticatedCaminhoRouteImport } from './routes/_authenticated/caminho'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated/lectio'
 import { Route as AuthenticatedPessoasRouteImport } from './routes/_authenticated/pessoas'
 import { Route as AuthenticatedSenhaRouteImport } from './routes/_authenticated/senha'
+import { Route as AuthenticatedAulasIndexRouteImport } from './routes/_authenticated/aulas/index'
+import { Route as AuthenticatedAulasIdRouteImport } from './routes/_authenticated/aulas/$id'
 import { Route as AuthenticatedBibliaIndexRouteImport } from './routes/_authenticated/biblia/index'
 import { Route as AuthenticatedBibliaCatecismoRouteImport } from './routes/_authenticated/biblia/catecismo'
 import { Route as AuthenticatedBibliaDestaquesRouteImport } from './routes/_authenticated/biblia/destaques'
@@ -37,11 +38,6 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAulasRoute = AuthenticatedAulasRouteImport.update({
-  id: '/aulas',
-  path: '/aulas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCaminhoRoute = AuthenticatedCaminhoRouteImport.update({
@@ -72,6 +68,16 @@ const AuthenticatedPessoasRoute = AuthenticatedPessoasRouteImport.update({
 const AuthenticatedSenhaRoute = AuthenticatedSenhaRouteImport.update({
   id: '/senha',
   path: '/senha',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAulasIndexRoute = AuthenticatedAulasIndexRouteImport.update({
+  id: '/aulas/',
+  path: '/aulas/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAulasIdRoute = AuthenticatedAulasIdRouteImport.update({
+  id: '/aulas/$id',
+  path: '/aulas/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBibliaIndexRoute =
@@ -108,22 +114,22 @@ const AuthenticatedReflexoesIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/aulas': typeof AuthenticatedAulasRoute
   '/caminho': typeof AuthenticatedCaminhoRoute
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
   '/pessoas': typeof AuthenticatedPessoasRoute
   '/senha': typeof AuthenticatedSenhaRoute
+  '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
+  '/aulas/': typeof AuthenticatedAulasIndexRoute
   '/biblia/': typeof AuthenticatedBibliaIndexRoute
   '/reflexoes/': typeof AuthenticatedReflexoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
-  '/aulas': typeof AuthenticatedAulasRoute
   '/caminho': typeof AuthenticatedCaminhoRoute
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
@@ -131,9 +137,11 @@ export interface FileRoutesByTo {
   '/pessoas': typeof AuthenticatedPessoasRoute
   '/senha': typeof AuthenticatedSenhaRoute
   '/': typeof AuthenticatedIndexRoute
+  '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
+  '/aulas': typeof AuthenticatedAulasIndexRoute
   '/biblia': typeof AuthenticatedBibliaIndexRoute
   '/reflexoes': typeof AuthenticatedReflexoesIndexRoute
 }
@@ -141,7 +149,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/aulas': typeof AuthenticatedAulasRoute
   '/_authenticated/caminho': typeof AuthenticatedCaminhoRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
@@ -149,9 +156,11 @@ export interface FileRoutesById {
   '/_authenticated/pessoas': typeof AuthenticatedPessoasRoute
   '/_authenticated/senha': typeof AuthenticatedSenhaRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/_authenticated/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/_authenticated/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/_authenticated/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
+  '/_authenticated/aulas/': typeof AuthenticatedAulasIndexRoute
   '/_authenticated/biblia/': typeof AuthenticatedBibliaIndexRoute
   '/_authenticated/reflexoes/': typeof AuthenticatedReflexoesIndexRoute
 }
@@ -160,22 +169,22 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/aulas'
     | '/caminho'
     | '/conta'
     | '/historico'
     | '/lectio'
     | '/pessoas'
     | '/senha'
+    | '/aulas/$id'
     | '/biblia/catecismo'
     | '/biblia/destaques'
     | '/reflexoes/$id'
+    | '/aulas/'
     | '/biblia/'
     | '/reflexoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
-    | '/aulas'
     | '/caminho'
     | '/conta'
     | '/historico'
@@ -183,16 +192,17 @@ export interface FileRouteTypes {
     | '/pessoas'
     | '/senha'
     | '/'
+    | '/aulas/$id'
     | '/biblia/catecismo'
     | '/biblia/destaques'
     | '/reflexoes/$id'
+    | '/aulas'
     | '/biblia'
     | '/reflexoes'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/aulas'
     | '/_authenticated/caminho'
     | '/_authenticated/conta'
     | '/_authenticated/historico'
@@ -200,9 +210,11 @@ export interface FileRouteTypes {
     | '/_authenticated/pessoas'
     | '/_authenticated/senha'
     | '/_authenticated/'
+    | '/_authenticated/aulas/$id'
     | '/_authenticated/biblia/catecismo'
     | '/_authenticated/biblia/destaques'
     | '/_authenticated/reflexoes/$id'
+    | '/_authenticated/aulas/'
     | '/_authenticated/biblia/'
     | '/_authenticated/reflexoes/'
   fileRoutesById: FileRoutesById
@@ -233,13 +245,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/aulas': {
-      id: '/_authenticated/aulas'
-      path: '/aulas'
-      fullPath: '/aulas'
-      preLoaderRoute: typeof AuthenticatedAulasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/caminho': {
@@ -284,6 +289,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSenhaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/aulas/': {
+      id: '/_authenticated/aulas/'
+      path: '/aulas'
+      fullPath: '/aulas/'
+      preLoaderRoute: typeof AuthenticatedAulasIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/aulas/$id': {
+      id: '/_authenticated/aulas/$id'
+      path: '/aulas/$id'
+      fullPath: '/aulas/$id'
+      preLoaderRoute: typeof AuthenticatedAulasIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/biblia/': {
       id: '/_authenticated/biblia/'
       path: '/biblia'
@@ -323,7 +342,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAulasRoute: typeof AuthenticatedAulasRoute
   AuthenticatedCaminhoRoute: typeof AuthenticatedCaminhoRoute
   AuthenticatedContaRoute: typeof AuthenticatedContaRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
@@ -331,15 +349,16 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPessoasRoute: typeof AuthenticatedPessoasRoute
   AuthenticatedSenhaRoute: typeof AuthenticatedSenhaRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAulasIdRoute: typeof AuthenticatedAulasIdRoute
   AuthenticatedBibliaCatecismoRoute: typeof AuthenticatedBibliaCatecismoRoute
   AuthenticatedBibliaDestaquesRoute: typeof AuthenticatedBibliaDestaquesRoute
   AuthenticatedReflexoesIdRoute: typeof AuthenticatedReflexoesIdRoute
+  AuthenticatedAulasIndexRoute: typeof AuthenticatedAulasIndexRoute
   AuthenticatedBibliaIndexRoute: typeof AuthenticatedBibliaIndexRoute
   AuthenticatedReflexoesIndexRoute: typeof AuthenticatedReflexoesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAulasRoute: AuthenticatedAulasRoute,
   AuthenticatedCaminhoRoute: AuthenticatedCaminhoRoute,
   AuthenticatedContaRoute: AuthenticatedContaRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
@@ -347,9 +366,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPessoasRoute: AuthenticatedPessoasRoute,
   AuthenticatedSenhaRoute: AuthenticatedSenhaRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAulasIdRoute: AuthenticatedAulasIdRoute,
   AuthenticatedBibliaCatecismoRoute: AuthenticatedBibliaCatecismoRoute,
   AuthenticatedBibliaDestaquesRoute: AuthenticatedBibliaDestaquesRoute,
   AuthenticatedReflexoesIdRoute: AuthenticatedReflexoesIdRoute,
+  AuthenticatedAulasIndexRoute: AuthenticatedAulasIndexRoute,
   AuthenticatedBibliaIndexRoute: AuthenticatedBibliaIndexRoute,
   AuthenticatedReflexoesIndexRoute: AuthenticatedReflexoesIndexRoute,
 }

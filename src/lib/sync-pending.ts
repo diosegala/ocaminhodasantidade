@@ -1,6 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { putInList, type Reflection } from "@/features/reflexoes/queries";
+import {
+  hasContent as lessonHasContent,
+  LESSON_COLUMNS,
+  lessonToRow,
+  putInList as putLessonInList,
+  type Lesson,
+} from "@/features/aulas/queries";
 
 type PendingLectio = {
   date?: string;
@@ -39,6 +46,18 @@ export async function syncPending(queryClient: QueryClient) {
       if (!error && queryClient.getQueryData(query.queryKey) === local) {
         queryClient.setQueryData(query.queryKey, data);
         putInList(queryClient, data);
+      }
+    } else if (kind === "lesson") {
+      const l = local as Lesson;
+      if (!lessonHasContent(l)) continue;
+      const { data, error } = await supabase
+        .from("lessons")
+        .upsert(lessonToRow(l), { onConflict: "id" })
+        .select(LESSON_COLUMNS)
+        .single();
+      if (!error && queryClient.getQueryData(query.queryKey) === local) {
+        queryClient.setQueryData(query.queryKey, data);
+        putLessonInList(queryClient, data);
       }
     } else if (kind === "lectio") {
       const e = local as PendingLectio;
