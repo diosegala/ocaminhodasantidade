@@ -10,7 +10,8 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
-    scrollRestoration: true,
+    // No Caminho, o tabuleiro rola sozinho até o dia de hoje; o roteador não mexe.
+    scrollRestoration: ({ location }) => location.pathname !== "/caminho",
     defaultPreloadStaleTime: 0,
     defaultViewTransition: true,
   });

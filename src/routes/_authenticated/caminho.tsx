@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Check, Flag } from "lucide-react";
+import { BookOpenText, Flag } from "lucide-react";
 import { computeStreak, localToday } from "@/features/lectio/liturgy";
 import { lectioHistoryQueryOptions } from "@/features/lectio/queries";
 import {
@@ -97,7 +97,21 @@ function CaminhoPage() {
         </div>
       </Card>
 
-      <div className="mt-5">
+      <ListGroup className="mt-5">
+        <Link to="/lectios" className={rowClass}>
+          <Row
+            icon={BookOpenText}
+            title="Minhas lectios"
+            detail={entries.length ? String(entries.length) : undefined}
+            chevron
+          />
+        </Link>
+      </ListGroup>
+      <p className="mt-3 px-4 text-[13px] text-muted-foreground">
+        Toque num dia do caminho para abrir a lectio daquele dia.
+      </p>
+
+      <div className="mt-4">
         <YearBoard
           year={year}
           today={today}
@@ -124,24 +138,6 @@ function CaminhoPage() {
                 />
               </button>
             ))}
-        </ListGroup>
-      )}
-
-      {entries.length > 0 && (
-        <ListGroup title="Lectios" className="mt-6">
-          {entries.map((e) => (
-            <Link key={e.date} to="/lectio" search={{ date: e.date }} className={rowClass}>
-              <Row
-                icon={e.completed_at ? Check : undefined}
-                title={new Date(e.date + "T12:00:00").toLocaleDateString("pt-BR", {
-                  day: "numeric",
-                  month: "short",
-                })}
-                detail={e.completed_at ? (e.reference ?? "") : "em andamento"}
-                chevron
-              />
-            </Link>
-          ))}
         </ListGroup>
       )}
 

@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Flame, Route as RouteIcon, Smartphone, X } from "lucide-react";
+import { BookOpenText, Flame, Route as RouteIcon, Smartphone, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { computeStreak, localToday } from "@/features/lectio/liturgy";
 import { useLiturgy } from "@/features/lectio/LectioScreen";
 import { lectioHistoryQueryOptions } from "@/features/lectio/queries";
 import { reflectionsQueryOptions } from "@/features/reflexoes/queries";
 import { DayTrail } from "@/features/caminho/DayTrail";
+import { DailyCard } from "@/features/hoje/DailyCard";
 import { InstallApp } from "@/components/app/InstallApp";
 import { Button } from "@/components/ui/button";
 import {
@@ -113,6 +114,8 @@ function Hoje() {
         )}
       </Card>
 
+      <DailyCard date={date} />
+
       <h2 className="eyebrow mb-1 mt-8 px-4">Seu caminho de hoje</h2>
       <DayTrail
         entry={entry.data ?? null}
@@ -136,6 +139,9 @@ function Hoje() {
             detail={streak === 0 ? "o caminho espera por você" : String(streak)}
             chevron
           />
+        </Link>
+        <Link to="/lectios" className={rowClass}>
+          <Row icon={BookOpenText} title="Minhas lectios" chevron />
         </Link>
       </ListGroup>
 

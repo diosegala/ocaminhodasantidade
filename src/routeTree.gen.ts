@@ -16,6 +16,7 @@ import { Route as AuthenticatedCaminhoRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedLectioRouteImport } from './routes/_authenticated/lectio'
+import { Route as AuthenticatedLectiosRouteImport } from './routes/_authenticated/lectios'
 import { Route as AuthenticatedPessoasRouteImport } from './routes/_authenticated/pessoas'
 import { Route as AuthenticatedSenhaRouteImport } from './routes/_authenticated/senha'
 import { Route as AuthenticatedAulasIndexRouteImport } from './routes/_authenticated/aulas/index'
@@ -58,6 +59,11 @@ const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
 const AuthenticatedLectioRoute = AuthenticatedLectioRouteImport.update({
   id: '/lectio',
   path: '/lectio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLectiosRoute = AuthenticatedLectiosRouteImport.update({
+  id: '/lectios',
+  path: '/lectios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPessoasRoute = AuthenticatedPessoasRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
+  '/lectios': typeof AuthenticatedLectiosRoute
   '/pessoas': typeof AuthenticatedPessoasRoute
   '/senha': typeof AuthenticatedSenhaRoute
   '/aulas/$id': typeof AuthenticatedAulasIdRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/lectio': typeof AuthenticatedLectioRoute
+  '/lectios': typeof AuthenticatedLectiosRoute
   '/pessoas': typeof AuthenticatedPessoasRoute
   '/senha': typeof AuthenticatedSenhaRoute
   '/': typeof AuthenticatedIndexRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/conta': typeof AuthenticatedContaRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/lectio': typeof AuthenticatedLectioRoute
+  '/_authenticated/lectios': typeof AuthenticatedLectiosRoute
   '/_authenticated/pessoas': typeof AuthenticatedPessoasRoute
   '/_authenticated/senha': typeof AuthenticatedSenhaRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/historico'
     | '/lectio'
+    | '/lectios'
     | '/pessoas'
     | '/senha'
     | '/aulas/$id'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/historico'
     | '/lectio'
+    | '/lectios'
     | '/pessoas'
     | '/senha'
     | '/'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conta'
     | '/_authenticated/historico'
     | '/_authenticated/lectio'
+    | '/_authenticated/lectios'
     | '/_authenticated/pessoas'
     | '/_authenticated/senha'
     | '/_authenticated/'
@@ -273,6 +285,13 @@ declare module '@tanstack/react-router' {
       path: '/lectio'
       fullPath: '/lectio'
       preLoaderRoute: typeof AuthenticatedLectioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lectios': {
+      id: '/_authenticated/lectios'
+      path: '/lectios'
+      fullPath: '/lectios'
+      preLoaderRoute: typeof AuthenticatedLectiosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pessoas': {
@@ -346,6 +365,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContaRoute: typeof AuthenticatedContaRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedLectioRoute: typeof AuthenticatedLectioRoute
+  AuthenticatedLectiosRoute: typeof AuthenticatedLectiosRoute
   AuthenticatedPessoasRoute: typeof AuthenticatedPessoasRoute
   AuthenticatedSenhaRoute: typeof AuthenticatedSenhaRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -363,6 +383,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContaRoute: AuthenticatedContaRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedLectioRoute: AuthenticatedLectioRoute,
+  AuthenticatedLectiosRoute: AuthenticatedLectiosRoute,
   AuthenticatedPessoasRoute: AuthenticatedPessoasRoute,
   AuthenticatedSenhaRoute: AuthenticatedSenhaRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

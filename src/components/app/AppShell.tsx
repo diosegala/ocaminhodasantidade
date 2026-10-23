@@ -22,6 +22,7 @@ const WARM_ROUTES = [
   "/biblia/catecismo",
   "/reflexoes",
   "/lectio",
+  "/lectios",
   "/caminho",
   "/conta",
   "/senha",

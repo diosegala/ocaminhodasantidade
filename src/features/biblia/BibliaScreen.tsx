@@ -10,7 +10,10 @@ import { booksQueryOptions } from "./queries";
 import {
   formatLinkRef,
   formatRef,
+  parseBook,
   parseReference,
+  stripAccents,
+  suggestBooks,
   type BookLite,
   type ParsedReference,
 } from "./reference";
@@ -85,35 +88,59 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
       setView({ name: "read", book: ref.book, chapter: ref.chapter });
       return;
     }
+    // Só o nome do livro ("joão", "salmos"): abre a lista de capítulos.
+    const book = parseBook(term, books);
+    if (book) {
+      setView({ name: "chapters", book });
+      return;
+    }
     if (term.length < 3) {
       setSearchError(
-        "Escreva uma referência (ex.: 2Tm 3,14-17) ou pelo menos 3 letras para buscar palavras.",
+        "Escreva uma passagem (ex.: João 3,16), um livro ou pelo menos 3 letras para buscar palavras.",
       );
       return;
     }
     setSearching(true);
+    const words = stripAccents(term).split(/\s+/).filter(Boolean);
+    // Sem acento e em qualquer ordem: o banco procura a palavra mais longa com "_" no lugar
+    // das letras que podem ter acento, e aqui ficam só os versículos com todas as palavras.
+    const longest = words.reduce((a, b) => (b.length > a.length ? b : a));
+    const pattern = `%${longest.replace(/[aeiouc]/g, "_")}%`;
     const { data, error } = await supabase
       .from("bible_verses")
       .select("book_id, chapter, verse, text, bible_books(name)")
-      .ilike("text", `%${term}%`)
+      .ilike("text", pattern)
       .order("book_id")
       .order("chapter")
       .order("verse")
-      .limit(40);
+      .limit(400);
     setSearching(false);
     if (error) {
       setSearchError("Não consegui buscar agora. Tente de novo.");
       return;
     }
-    const mapped = (data ?? []).map((r) => ({
-      book_id: r.book_id,
-      chapter: r.chapter,
-      verse: r.verse,
-      text: r.text,
-      book_name: (r.bible_books as unknown as { name: string } | null)?.name ?? "",
-    }));
+    const mapped = (data ?? [])
+      .filter((r) => {
+        const text = stripAccents(r.text);
+        return words.every((w) => text.includes(w));
+      })
+      .slice(0, 60)
+      .map((r) => ({
+        book_id: r.book_id,
+        chapter: r.chapter,
+        verse: r.verse,
+        text: r.text,
+        book_name: (r.bible_books as unknown as { name: string } | null)?.name ?? "",
+      }));
     setResults(mapped);
-    if (mapped.length === 0) setSearchError(`Nada encontrado para "${term}".`);
+    if (mapped.length === 0) {
+      const options = suggestBooks(term, books);
+      setSearchError(
+        options.length
+          ? `Nada encontrado para "${term}". Você quis dizer ${options.map((b) => b.name).join(", ")}?`
+          : `Nada encontrado para "${term}".`,
+      );
+    }
   }
 
   function openResult(r: SearchResult) {
@@ -181,7 +208,7 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
             enterKeyHint="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="2Tm 3,14-17 ou uma palavra"
+            placeholder="João 3,16, um livro ou palavras"
             className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
           />
         </label>

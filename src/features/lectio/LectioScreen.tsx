@@ -3,10 +3,17 @@ import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Highlighter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { parseReference, type BookLite } from "@/features/biblia/reference";
+import { formatLinkRef, parseReference, type BookLite } from "@/features/biblia/reference";
 import { booksQueryOptions } from "@/features/biblia/queries";
+import { ReferenceHint } from "@/features/biblia/ReferenceHint";
 import { getLiturgy } from "./liturgy.functions";
-import { markRanges, splitVerseNumbers, type Reading, type VerseSegment } from "./liturgy";
+import {
+  localToday,
+  markRanges,
+  splitVerseNumbers,
+  type Reading,
+  type VerseSegment,
+} from "./liturgy";
 import {
   Card,
   Chip,
@@ -213,10 +220,15 @@ export function LectioScreen({
     setStep(4);
   }
 
+  const backTo =
+    date === localToday()
+      ? ({ label: "Hoje", to: "/" } as const)
+      : ({ label: "Voltar", to: "/lectios" } as const);
+
   if (entryQ.isLoading || liturgyQ.isLoading || !entry) {
     return (
       <section>
-        <ScreenHeader title="Lectio divina" back={{ label: "Hoje", to: "/" }} />
+        <ScreenHeader title="Lectio divina" back={backTo} />
         <p className="reading text-muted-foreground">Preparando a leitura…</p>
       </section>
     );
@@ -233,7 +245,7 @@ export function LectioScreen({
       <ScreenHeader
         title="Lectio divina"
         subtitle={dateLabel}
-        back={{ label: "Hoje", to: "/" }}
+        back={backTo}
         action={<SaveBadge state={saveState} />}
       />
 
@@ -246,6 +258,7 @@ export function LectioScreen({
           fromCacheOfDate={liturgyQ.data?.fromCacheOfDate ?? null}
           liturgyFailed={!liturgy}
           reference={reference}
+          books={books}
           onReference={(r) => update({ reference: r })}
         />
       )}
@@ -344,9 +357,14 @@ export function LectioScreen({
           <Button variant="secondary" size="lg" disabled>
             Ver apoio (chega na próxima etapa)
           </Button>
-          <Button asChild variant="link" className="w-full text-[17px]">
-            <Link to="/caminho">Ver meu caminho</Link>
-          </Button>
+          <div className="flex justify-center gap-6">
+            <Button asChild variant="link" className="text-[17px]">
+              <Link to="/caminho">Ver meu caminho</Link>
+            </Button>
+            <Button asChild variant="link" className="text-[17px]">
+              <Link to="/lectios">Lectios anteriores</Link>
+            </Button>
+          </div>
         </div>
       )}
     </section>
@@ -379,6 +397,7 @@ function TextChooser(props: {
   fromCacheOfDate: string | null;
   liturgyFailed: boolean;
   reference: string | null;
+  books: BookLite[];
   onReference: (r: string) => void;
 }) {
   const [manual, setManual] = useState("");
@@ -412,7 +431,14 @@ function TextChooser(props: {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (manual.trim()) props.onReference(manual.trim());
+          if (!manual.trim()) return;
+          // Guarda já no formato da Bíblia ("jo 3 16" → "Jo 3,16").
+          const ref = parseReference(manual, props.books);
+          props.onReference(
+            ref
+              ? formatLinkRef(ref.book, ref.chapter, ref.verseStart, ref.verseEnd)
+              : manual.trim(),
+          );
         }}
         className="flex gap-2"
       >
@@ -426,6 +452,7 @@ function TextChooser(props: {
           Usar
         </Button>
       </form>
+      <ReferenceHint input={manual} books={props.books} onChange={setManual} />
     </div>
   );
 }

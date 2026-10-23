@@ -140,8 +140,12 @@ export function YearBoard({
   }, [year, today, entries, milestoneDates]);
 
   const todayRef = useRef<SVGGElement>(null);
+  // Abre no dia de hoje, no meio da tela. (No iPhone, scrollIntoView em SVG não é confiável.)
   useEffect(() => {
-    todayRef.current?.scrollIntoView({ block: "center" });
+    const el = todayRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2 });
   }, []);
 
   return (

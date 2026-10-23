@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { formatLinkRef, parseReference } from "@/features/biblia/reference";
+import { ReferenceHint } from "@/features/biblia/ReferenceHint";
 import { Chip, ListGroup, rowClass } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { taggingsQueryOptions, tagsQueryOptions, type LinkSource } from "./queries";
@@ -79,7 +80,7 @@ export function LinkedVerses({ source, id, ensureSaved }: Props) {
     e.preventDefault();
     const ref = parseReference(input, books);
     if (!ref) {
-      toast.error('Não reconheci a referência. Tente algo como "Jo 15,1-8".');
+      toast.error("Não reconheci o trecho. Escreva o livro e o capítulo, ex.: João 15,1-8.");
       return;
     }
     add.mutate(ref);
@@ -117,7 +118,7 @@ export function LinkedVerses({ source, id, ensureSaved }: Props) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ligar um trecho, ex.: Jo 15,1-8"
+          placeholder="Ligar um trecho, ex.: João 15,1-8"
           className="h-11 flex-1 rounded-xl bg-card px-4 text-base shadow-card outline-none focus:ring-2 focus:ring-ring"
         />
         <Button
@@ -130,6 +131,7 @@ export function LinkedVerses({ source, id, ensureSaved }: Props) {
           <Plus />
         </Button>
       </form>
+      <ReferenceHint input={input} books={books} onChange={setInput} />
     </section>
   );
 }
