@@ -9,6 +9,13 @@ import { lectioHistoryQueryOptions } from "@/features/lectio/queries";
 import { reflectionsQueryOptions } from "@/features/reflexoes/queries";
 import { DayTrail } from "@/features/caminho/DayTrail";
 import { DailyCard } from "@/features/hoje/DailyCard";
+import { MessageSheet } from "@/features/avisos/MessageSheet";
+import {
+  claimWelcome,
+  messagesEnabled,
+  welcomeFor,
+  type Message,
+} from "@/features/avisos/messages";
 import { InstallApp } from "@/components/app/InstallApp";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,9 +78,24 @@ function Hoje() {
   const seasonDone = doneDates.filter((d) => d >= season.start && d <= date).length;
   // Celebra um marco recente na primeira vez que a pessoa abre a Hoje depois dele.
   const [celebrate, setCelebrate] = useState<Milestone | null>(null);
+  // Sem marco para celebrar, dá as boas-vindas na primeira abertura do dia.
+  const [welcome, setWelcome] = useState<Message | null>(null);
   useEffect(() => {
     if (!history.isSuccess) return;
-    setCelebrate(nextCelebration(computeMilestones(doneDates, date), date));
+    const milestone = nextCelebration(computeMilestones(doneDates, date), date);
+    setCelebrate(milestone);
+    if (milestone || !messagesEnabled() || !claimWelcome(date)) return;
+    void supabase.auth.getSession().then(({ data }) => {
+      setWelcome(
+        welcomeFor({
+          hour: new Date().getHours(),
+          name: (data.session?.user.user_metadata?.["name"] as string | undefined) ?? "",
+          seasonName: season.name,
+          lectioDoneToday: doneDates.includes(date),
+          streak,
+        }),
+      );
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history.isSuccess, history.dataUpdatedAt, date]);
 
@@ -144,6 +166,8 @@ function Hoje() {
           <Row icon={BookOpenText} title="Minhas lectios" chevron />
         </Link>
       </ListGroup>
+
+      {welcome && <MessageSheet message={welcome} onClose={() => setWelcome(null)} />}
 
       {celebrate && (
         <MilestoneSheet

@@ -104,3 +104,38 @@ async function trim(cache) {
   const keys = await cache.keys();
   for (const key of keys.slice(0, Math.max(0, keys.length - MAX_ASSETS))) await cache.delete(key);
 }
+
+// Notificações (aviso diário da lectio). O servidor manda { title, body, url, tag }.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Caminho", {
+      body: data.body || "A Palavra de hoje espera por você.",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      tag: data.tag || "caminho",
+      data: { url: data.url || "/" },
+    }),
+  );
+});
+
+// Ao tocar: volta para o app já aberto, se houver, ou abre um novo.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ("focus" in client) {
+          return client.focus().then((c) => ("navigate" in c ? c.navigate(url) : c));
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
+});

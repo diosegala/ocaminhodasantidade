@@ -4,6 +4,7 @@ import { BookOpen, CloudOff, GraduationCap, NotebookPen, Sunrise } from "lucide-
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { booksQueryOptions } from "@/features/biblia/queries";
 import { syncPending } from "@/lib/sync-pending";
+import { PauseReminder } from "@/features/avisos/PauseReminder";
 import { reserveLiturgyOnce } from "@/features/lectio/liturgy-reserve";
 
 const tabs = [
@@ -84,6 +85,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="flex-1 px-5 pb-[calc(max(env(safe-area-inset-bottom),0.75rem)+6rem)] pt-[max(env(safe-area-inset-top),0.75rem)]">
         {children}
       </main>
+
+      <PauseReminder />
 
       <nav
         style={{ viewTransitionName: "tabbar" }}

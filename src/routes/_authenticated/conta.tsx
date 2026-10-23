@@ -1,7 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Bell, Download, KeyRound, LogOut, Smartphone, Users, X } from "lucide-react";
+import {
+  Bell,
+  Download,
+  KeyRound,
+  LogOut,
+  MessageCircleHeart,
+  Smartphone,
+  Users,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { idbPersister } from "@/lib/query-persister";
@@ -10,6 +19,9 @@ import { ListGroup, Row, rowClass, ScreenHeader, SegmentedControl } from "@/comp
 import { Button } from "@/components/ui/button";
 import { buildExport, shareExport } from "@/features/conta/export";
 import { InstallApp } from "@/components/app/InstallApp";
+import { Switch } from "@/components/ui/switch";
+import { messagesEnabled, setMessagesEnabled } from "@/features/avisos/messages";
+import { NotificationsSheet } from "@/features/avisos/NotificationsSheet";
 
 export const Route = createFileRoute("/_authenticated/conta")({
   head: () => ({
@@ -35,6 +47,8 @@ function ContaPage() {
   const [theme, setTheme] = useState<ThemeMode>("system");
   const [exporting, setExporting] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [messages, setMessages] = useState(true);
 
   async function exportTexts() {
     setExporting(true);
@@ -47,7 +61,10 @@ function ContaPage() {
     }
   }
 
-  useEffect(() => setTheme(getThemeMode()), []);
+  useEffect(() => {
+    setTheme(getThemeMode());
+    setMessages(messagesEnabled());
+  }, []);
 
   const me = useQuery({
     queryKey: ["me"],
@@ -110,8 +127,24 @@ function ContaPage() {
             </button>
           )}
         </InstallApp>
-        <button onClick={() => setShowReminder(true)} className={rowClass}>
-          <Row icon={Bell} title="Lembrete diário" chevron />
+        <label className={rowClass}>
+          <MessageCircleHeart className="h-5 w-5 shrink-0 text-primary" />
+          <span className="min-w-0 flex-1">
+            <span className="block">Mensagens no app</span>
+            <span className="block text-[13px] text-muted-foreground">
+              Boas-vindas do dia e pausas para rezar
+            </span>
+          </span>
+          <Switch
+            checked={messages}
+            onCheckedChange={(on) => {
+              setMessages(on);
+              setMessagesEnabled(on);
+            }}
+          />
+        </label>
+        <button onClick={() => setShowNotifications(true)} className={rowClass}>
+          <Row icon={Bell} title="Aviso diário" detail="notificação" chevron />
         </button>
         <button onClick={() => void exportTexts()} disabled={exporting} className={rowClass}>
           <Row
@@ -129,14 +162,24 @@ function ContaPage() {
         </button>
       </ListGroup>
 
+      {showNotifications && (
+        <NotificationsSheet
+          onClose={() => setShowNotifications(false)}
+          onReminderFallback={() => {
+            setShowNotifications(false);
+            setShowReminder(true);
+          }}
+        />
+      )}
       {showReminder && <ReminderSheet onClose={() => setShowReminder(false)} />}
     </section>
   );
 }
 
 /**
- * Passo a passo para um lembrete diário pelo app Lembretes do iPhone. (A ação "Abrir App"
- * dos Atalhos não lista apps da Tela de Início; notificações próprias do app ficam para depois.)
+ * Passo a passo para um lembrete diário pelo app Lembretes do iPhone, para quando o
+ * navegador não recebe notificações. (A ação "Abrir App" dos Atalhos não lista apps da
+ * Tela de Início.)
  */
 function ReminderSheet({ onClose }: { onClose: () => void }) {
   const steps = [

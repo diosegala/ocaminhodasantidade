@@ -26,6 +26,7 @@ import { Route as AuthenticatedBibliaCatecismoRouteImport } from './routes/_auth
 import { Route as AuthenticatedBibliaDestaquesRouteImport } from './routes/_authenticated/biblia/destaques'
 import { Route as AuthenticatedReflexoesIndexRouteImport } from './routes/_authenticated/reflexoes/index'
 import { Route as AuthenticatedReflexoesIdRouteImport } from './routes/_authenticated/reflexoes/$id'
+import { Route as ApiPushDiarioRouteImport } from './routes/api/push/diario'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -116,6 +117,11 @@ const AuthenticatedReflexoesIdRoute =
     path: '/reflexoes/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPushDiarioRoute = ApiPushDiarioRouteImport.update({
+  id: '/api/push/diario',
+  path: '/api/push/diario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
+  '/api/push/diario': typeof ApiPushDiarioRoute
   '/aulas/': typeof AuthenticatedAulasIndexRoute
   '/biblia/': typeof AuthenticatedBibliaIndexRoute
   '/reflexoes/': typeof AuthenticatedReflexoesIndexRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
+  '/api/push/diario': typeof ApiPushDiarioRoute
   '/aulas': typeof AuthenticatedAulasIndexRoute
   '/biblia': typeof AuthenticatedBibliaIndexRoute
   '/reflexoes': typeof AuthenticatedReflexoesIndexRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/_authenticated/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/_authenticated/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
   '/_authenticated/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
+  '/api/push/diario': typeof ApiPushDiarioRoute
   '/_authenticated/aulas/': typeof AuthenticatedAulasIndexRoute
   '/_authenticated/biblia/': typeof AuthenticatedBibliaIndexRoute
   '/_authenticated/reflexoes/': typeof AuthenticatedReflexoesIndexRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/biblia/catecismo'
     | '/biblia/destaques'
     | '/reflexoes/$id'
+    | '/api/push/diario'
     | '/aulas/'
     | '/biblia/'
     | '/reflexoes/'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/biblia/catecismo'
     | '/biblia/destaques'
     | '/reflexoes/$id'
+    | '/api/push/diario'
     | '/aulas'
     | '/biblia'
     | '/reflexoes'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/_authenticated/biblia/catecismo'
     | '/_authenticated/biblia/destaques'
     | '/_authenticated/reflexoes/$id'
+    | '/api/push/diario'
     | '/_authenticated/aulas/'
     | '/_authenticated/biblia/'
     | '/_authenticated/reflexoes/'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPushDiarioRoute: typeof ApiPushDiarioRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -357,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReflexoesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/push/diario': {
+      id: '/api/push/diario'
+      path: '/api/push/diario'
+      fullPath: '/api/push/diario'
+      preLoaderRoute: typeof ApiPushDiarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -402,6 +422,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPushDiarioRoute: ApiPushDiarioRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

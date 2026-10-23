@@ -85,6 +85,11 @@ function pick<T>(items: T[], n: number): T {
   return items[(n * 7) % items.length]!;
 }
 
+/** A palavra do dia (a mesma do cartão "Para hoje" nos dias de palavra). */
+export function wordOfDay(date: string): Word {
+  return pick(WORDS, dayNumber(date));
+}
+
 /** O cartão do dia. Em dias alternados, se houver, uma lectio de pelo menos 7 dias atrás. */
 export function dailyFor(date: string, entries: MemoryEntry[]): Daily {
   const n = dayNumber(date);
