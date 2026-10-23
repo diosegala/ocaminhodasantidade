@@ -11,7 +11,10 @@ const subscription = z.object({
 /** Chave pública do VAPID, para o navegador criar a inscrição (null = ainda não configurado). */
 export const getPushKey = createServerFn({ method: "GET" })
   .middleware([requireAuth])
-  .handler(async () => process.env["VAPID_PUBLIC_KEY"] ?? null);
+  .handler(async () => {
+    const { vapidKeys } = await import("./push.server");
+    return (await vapidKeys())?.publicKey ?? null;
+  });
 
 export const savePushSubscription = createServerFn({ method: "POST" })
   .middleware([requireAuth])
@@ -61,8 +64,8 @@ export const sendTestPush = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((input: unknown) => z.object({ endpoint: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { deliver, vapidFromEnv } = await import("./push.server");
-    const vapid = vapidFromEnv();
+    const { deliver, vapidKeys } = await import("./push.server");
+    const vapid = await vapidKeys();
     if (!vapid) throw new Error("As notificações ainda não foram configuradas no servidor.");
     const { data: sub } = await context.supabase
       .from("push_subscriptions")

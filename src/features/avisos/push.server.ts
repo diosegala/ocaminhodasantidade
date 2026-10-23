@@ -4,14 +4,47 @@ import { brasiliaNow, dailyPush, type PushMessage } from "./push-message";
 
 // Só roda no servidor: usa as chaves secretas do VAPID e o acesso de administrador.
 
-export function vapidFromEnv(): VapidKeys | null {
-  const publicKey = process.env["VAPID_PUBLIC_KEY"];
-  const privateKey = process.env["VAPID_PRIVATE_KEY"];
-  if (!publicKey || !privateKey) return null;
+const SECRET_NAMES = [
+  "VAPID_PUBLIC_KEY",
+  "VAPID_PRIVATE_KEY",
+  "VAPID_SUBJECT",
+  "PUSH_CRON_SECRET",
+] as const;
+type SecretName = (typeof SECRET_NAMES)[number];
+
+let cached: { at: number; values: Partial<Record<SecretName, string>> } | null = null;
+
+/**
+ * Segredos das notificações: das variáveis de ambiente, se existirem; senão, do Vault do
+ * Supabase (migração app_secrets_vault). Guardados por 5 minutos para não consultar a cada envio.
+ */
+export async function pushSecrets(): Promise<Partial<Record<SecretName, string>>> {
+  if (cached && Date.now() - cached.at < 5 * 60_000) return cached.values;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const entries = await Promise.all(
+    SECRET_NAMES.map(async (name) => {
+      const fromEnv = process.env[name];
+      if (fromEnv) return [name, fromEnv] as const;
+      const { data } = await supabaseAdmin.rpc("get_app_secret", { secret_name: name });
+      return [name, data ?? undefined] as const;
+    }),
+  );
+  const values = Object.fromEntries(entries.filter(([, v]) => v)) as Partial<
+    Record<SecretName, string>
+  >;
+  // Só guarda quando achou tudo, para valer logo depois que a pessoa cadastrar.
+  if (SECRET_NAMES.every((n) => n === "VAPID_SUBJECT" || values[n]))
+    cached = { at: Date.now(), values };
+  return values;
+}
+
+export async function vapidKeys(): Promise<VapidKeys | null> {
+  const s = await pushSecrets();
+  if (!s.VAPID_PUBLIC_KEY || !s.VAPID_PRIVATE_KEY) return null;
   return {
-    publicKey,
-    privateKey,
-    subject: process.env["VAPID_SUBJECT"] ?? "https://ocaminhodasantidade.lovable.app",
+    publicKey: s.VAPID_PUBLIC_KEY,
+    privateKey: s.VAPID_PRIVATE_KEY,
+    subject: s.VAPID_SUBJECT ?? "https://ocaminhodasantidade.lovable.app",
   };
 }
 
@@ -33,7 +66,7 @@ export async function deliver(
 
 /** Aviso da hora cheia: para cada aparelho que escolheu esta hora (de Brasília). */
 export async function sendDailyPushes(now = new Date()) {
-  const vapid = vapidFromEnv();
+  const vapid = await vapidKeys();
   if (!vapid) throw new Error("Faltam VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY.");
   const { date, hour } = brasiliaNow(now);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

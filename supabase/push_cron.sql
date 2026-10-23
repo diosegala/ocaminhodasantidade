@@ -1,5 +1,5 @@
 -- Agendamento do aviso diário. NÃO é uma migração: rode uma vez no SQL Editor,
--- depois de trocar COLE_AQUI_O_SEGREDO pelo mesmo valor de PUSH_CRON_SECRET no Lovable.
+-- depois de trocar COLE_AQUI_O_SEGREDO pelo mesmo valor de PUSH_CRON_SECRET guardado no Vault.
 -- A cada hora cheia, o banco chama o app, que avisa quem escolheu aquela hora.
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
