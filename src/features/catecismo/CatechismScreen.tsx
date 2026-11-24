@@ -12,6 +12,7 @@ import {
   searchForm,
   type Catechism,
 } from "./data";
+import { NO_AUTOFILL } from "@/lib/text-fields";
 
 export function CatechismScreen({ n, c }: { n?: number | undefined; c?: number | undefined }) {
   const q = useQuery(catechismQueryOptions);
@@ -83,6 +84,7 @@ function CatechismHome({ cat }: { cat: Catechism }) {
         <label className="flex h-11 flex-1 items-center gap-2 rounded-xl bg-secondary px-3">
           <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
           <input
+            {...NO_AUTOFILL}
             type="search"
             enterKeyHint="search"
             value={term}

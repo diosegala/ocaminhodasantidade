@@ -23,6 +23,7 @@ import {
   type SaveState,
 } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
+import { NO_AUTOFILL, PROSE } from "@/lib/text-fields";
 
 type Entry = {
   id?: string;
@@ -297,6 +298,7 @@ export function LectioScreen({
           </p>
           <h2 className="title mt-1">{STEPS[step].question}</h2>
           <textarea
+            {...PROSE}
             value={(entry[STEPS[step].key] as string | null) ?? ""}
             onChange={(e) => update({ [STEPS[step]!.key]: e.target.value } as Partial<Entry>)}
             rows={step === 0 ? 2 : 7}
@@ -443,6 +445,7 @@ function TextChooser(props: {
         className="flex gap-2"
       >
         <input
+          {...NO_AUTOFILL}
           value={manual}
           onChange={(e) => setManual(e.target.value)}
           placeholder="Outro trecho, ex.: Jo 15,1-8"

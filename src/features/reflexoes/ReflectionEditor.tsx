@@ -8,6 +8,7 @@ import { LinkedVerses, Tags } from "@/features/ligacoes/Ligacoes";
 import { SaveBadge, ScreenHeader, type SaveState } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { putInList, SOURCE, type Reflection } from "./queries";
+import { PROSE } from "@/lib/text-fields";
 
 export function ReflectionEditor({ id }: { id: string }) {
   const navigate = useNavigate();
@@ -161,6 +162,7 @@ export function ReflectionEditor({ id }: { id: string }) {
       />
 
       <input
+        {...PROSE}
         value={draft.title}
         onChange={(e) => update({ title: e.target.value })}
         placeholder="Título"
@@ -174,6 +176,7 @@ export function ReflectionEditor({ id }: { id: string }) {
         })}
       </p>
       <textarea
+        {...PROSE}
         ref={bodyRef}
         value={draft.body}
         onChange={(e) => update({ body: e.target.value })}

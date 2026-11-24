@@ -10,6 +10,7 @@ import { ReferenceHint } from "@/features/biblia/ReferenceHint";
 import { Chip, ListGroup, rowClass } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { taggingsQueryOptions, tagsQueryOptions, type LinkSource } from "./queries";
+import { NO_AUTOFILL, PROSE } from "@/lib/text-fields";
 
 // Versículos e temas ligados a um texto (reflexão, aula…), identificado por `source` + `id`.
 
@@ -116,6 +117,7 @@ export function LinkedVerses({ source, id, ensureSaved }: Props) {
       )}
       <form onSubmit={submit} className="flex gap-2">
         <input
+          {...NO_AUTOFILL}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ligar um trecho, ex.: João 15,1-8"
@@ -208,6 +210,7 @@ export function Tags({ source, id, ensureSaved }: Props) {
         className="flex gap-2"
       >
         <input
+          {...PROSE}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Novo tema, ex.: Eucaristia"

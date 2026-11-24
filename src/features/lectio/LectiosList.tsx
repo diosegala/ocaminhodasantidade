@@ -5,6 +5,7 @@ import { Search, Sunrise } from "lucide-react";
 import { stripAccents } from "@/features/biblia/reference";
 import { Chip, EmptyState, ScreenHeader } from "@/components/app/ui";
 import { lectioEntriesQueryOptions } from "./queries";
+import { NO_AUTOFILL } from "@/lib/text-fields";
 
 type Filter = "todas" | "escritas" | "andamento";
 
@@ -54,6 +55,7 @@ export function LectiosList() {
           <label className="flex h-11 items-center gap-2 rounded-xl bg-secondary px-3">
             <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
             <input
+              {...NO_AUTOFILL}
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

@@ -17,6 +17,7 @@ import {
   type BookLite,
   type ParsedReference,
 } from "./reference";
+import { NO_AUTOFILL, PROSE } from "@/lib/text-fields";
 
 type View =
   | { name: "home" }
@@ -204,6 +205,7 @@ export function BibliaScreen({ initialRef }: { initialRef?: string } = {}) {
         <label className="flex h-11 flex-1 items-center gap-2 rounded-xl bg-secondary px-3">
           <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
           <input
+            {...NO_AUTOFILL}
             type="search"
             enterKeyHint="search"
             value={searchInput}
@@ -643,6 +645,7 @@ function VerseSheet({
 
         <p className="eyebrow mt-5">Nota</p>
         <textarea
+          {...PROSE}
           value={noteDraft}
           onChange={(e) => setNoteDraft(e.target.value)}
           onBlur={() => {

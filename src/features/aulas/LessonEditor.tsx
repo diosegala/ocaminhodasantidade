@@ -18,6 +18,7 @@ import {
   today,
   type Lesson,
 } from "./queries";
+import { PROSE } from "@/lib/text-fields";
 
 type Editable = Pick<Lesson, "date" | "theme" | "raw_transcript" | "user_synthesis">;
 
@@ -180,6 +181,7 @@ export function LessonEditor({ id }: { id: string }) {
         className="eyebrow -ml-1 rounded-lg bg-transparent px-1 py-0.5 outline-none focus:ring-2 focus:ring-ring"
       />
       <input
+        {...PROSE}
         value={draft.theme}
         onChange={(e) => update({ theme: e.target.value })}
         placeholder="Tema da aula"
@@ -242,6 +244,7 @@ function GrowingTextarea({
   }, [value]);
   return (
     <textarea
+      {...PROSE}
       ref={ref}
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -313,6 +316,7 @@ function Questions({ id, ensureSaved }: { id: string; ensureSaved: () => Promise
       )}
       <form onSubmit={submit} className="flex gap-2">
         <input
+          {...PROSE}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Uma dúvida para levar ao catequista"
@@ -388,6 +392,7 @@ function QuestionRow({ q, onChanged }: { q: Question; onChanged: () => void }) {
       {open && (
         <div className="mt-3 pl-9">
           <textarea
+            {...PROSE}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             rows={3}

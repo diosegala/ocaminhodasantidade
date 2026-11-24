@@ -6,6 +6,7 @@ import { stripAccents } from "@/features/biblia/reference";
 import { EmptyState, ScreenHeader } from "@/components/app/ui";
 import { Button } from "@/components/ui/button";
 import { formatLessonDate, lessonsQueryOptions, openQuestionsQueryOptions } from "./queries";
+import { NO_AUTOFILL } from "@/lib/text-fields";
 
 export function LessonsList() {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export function LessonsList() {
         <label className="mt-5 flex h-11 items-center gap-2 rounded-xl bg-secondary px-3">
           <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
           <input
+            {...NO_AUTOFILL}
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
