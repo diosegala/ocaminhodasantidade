@@ -9,6 +9,7 @@ import { lectioHistoryQueryOptions } from "@/features/lectio/queries";
 import { reflectionsQueryOptions } from "@/features/reflexoes/queries";
 import { DayTrail } from "@/features/caminho/DayTrail";
 import { DailyCard } from "@/features/hoje/DailyCard";
+import { CatechismCard } from "@/features/catecismo/CatechismCard";
 import { MessageSheet } from "@/features/avisos/MessageSheet";
 import {
   claimWelcome,
@@ -137,6 +138,7 @@ function Hoje() {
       </Card>
 
       <DailyCard date={date} />
+      <CatechismCard date={date} />
 
       <h2 className="eyebrow mb-1 mt-8 px-4">Seu caminho de hoje</h2>
       <DayTrail
