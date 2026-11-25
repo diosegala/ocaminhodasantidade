@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAssistenteRouteImport } from './routes/_authenticated/assistente'
 import { Route as AuthenticatedCaminhoRouteImport } from './routes/_authenticated/caminho'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
@@ -24,6 +25,7 @@ import { Route as AuthenticatedAulasIdRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedBibliaIndexRouteImport } from './routes/_authenticated/biblia/index'
 import { Route as AuthenticatedBibliaCatecismoRouteImport } from './routes/_authenticated/biblia/catecismo'
 import { Route as AuthenticatedBibliaDestaquesRouteImport } from './routes/_authenticated/biblia/destaques'
+import { Route as AuthenticatedBibliaPerguntarRouteImport } from './routes/_authenticated/biblia/perguntar'
 import { Route as AuthenticatedReflexoesIndexRouteImport } from './routes/_authenticated/reflexoes/index'
 import { Route as AuthenticatedReflexoesIdRouteImport } from './routes/_authenticated/reflexoes/$id'
 import { Route as ApiPushDiarioRouteImport } from './routes/api/push/diario'
@@ -40,6 +42,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAssistenteRoute = AuthenticatedAssistenteRouteImport.update({
+  id: '/assistente',
+  path: '/assistente',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCaminhoRoute = AuthenticatedCaminhoRouteImport.update({
@@ -105,6 +112,12 @@ const AuthenticatedBibliaDestaquesRoute =
     path: '/biblia/destaques',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBibliaPerguntarRoute =
+  AuthenticatedBibliaPerguntarRouteImport.update({
+    id: '/biblia/perguntar',
+    path: '/biblia/perguntar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReflexoesIndexRoute =
   AuthenticatedReflexoesIndexRouteImport.update({
     id: '/reflexoes/',
@@ -126,6 +139,7 @@ const ApiPushDiarioRoute = ApiPushDiarioRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/assistente': typeof AuthenticatedAssistenteRoute
   '/caminho': typeof AuthenticatedCaminhoRoute
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
@@ -136,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/biblia/perguntar': typeof AuthenticatedBibliaPerguntarRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/api/push/diario': typeof ApiPushDiarioRoute
   '/aulas/': typeof AuthenticatedAulasIndexRoute
@@ -144,6 +159,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/assistente': typeof AuthenticatedAssistenteRoute
   '/caminho': typeof AuthenticatedCaminhoRoute
   '/conta': typeof AuthenticatedContaRoute
   '/historico': typeof AuthenticatedHistoricoRoute
@@ -155,6 +171,7 @@ export interface FileRoutesByTo {
   '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/biblia/perguntar': typeof AuthenticatedBibliaPerguntarRoute
   '/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/api/push/diario': typeof ApiPushDiarioRoute
   '/aulas': typeof AuthenticatedAulasIndexRoute
@@ -165,6 +182,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/assistente': typeof AuthenticatedAssistenteRoute
   '/_authenticated/caminho': typeof AuthenticatedCaminhoRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
@@ -176,6 +194,7 @@ export interface FileRoutesById {
   '/_authenticated/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/_authenticated/biblia/catecismo': typeof AuthenticatedBibliaCatecismoRoute
   '/_authenticated/biblia/destaques': typeof AuthenticatedBibliaDestaquesRoute
+  '/_authenticated/biblia/perguntar': typeof AuthenticatedBibliaPerguntarRoute
   '/_authenticated/reflexoes/$id': typeof AuthenticatedReflexoesIdRoute
   '/api/push/diario': typeof ApiPushDiarioRoute
   '/_authenticated/aulas/': typeof AuthenticatedAulasIndexRoute
@@ -187,6 +206,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/assistente'
     | '/caminho'
     | '/conta'
     | '/historico'
@@ -197,6 +217,7 @@ export interface FileRouteTypes {
     | '/aulas/$id'
     | '/biblia/catecismo'
     | '/biblia/destaques'
+    | '/biblia/perguntar'
     | '/reflexoes/$id'
     | '/api/push/diario'
     | '/aulas/'
@@ -205,6 +226,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/assistente'
     | '/caminho'
     | '/conta'
     | '/historico'
@@ -216,6 +238,7 @@ export interface FileRouteTypes {
     | '/aulas/$id'
     | '/biblia/catecismo'
     | '/biblia/destaques'
+    | '/biblia/perguntar'
     | '/reflexoes/$id'
     | '/api/push/diario'
     | '/aulas'
@@ -225,6 +248,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/assistente'
     | '/_authenticated/caminho'
     | '/_authenticated/conta'
     | '/_authenticated/historico'
@@ -236,6 +260,7 @@ export interface FileRouteTypes {
     | '/_authenticated/aulas/$id'
     | '/_authenticated/biblia/catecismo'
     | '/_authenticated/biblia/destaques'
+    | '/_authenticated/biblia/perguntar'
     | '/_authenticated/reflexoes/$id'
     | '/api/push/diario'
     | '/_authenticated/aulas/'
@@ -270,6 +295,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/assistente': {
+      id: '/_authenticated/assistente'
+      path: '/assistente'
+      fullPath: '/assistente'
+      preLoaderRoute: typeof AuthenticatedAssistenteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/caminho': {
@@ -356,6 +388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBibliaDestaquesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/biblia/perguntar': {
+      id: '/_authenticated/biblia/perguntar'
+      path: '/biblia/perguntar'
+      fullPath: '/biblia/perguntar'
+      preLoaderRoute: typeof AuthenticatedBibliaPerguntarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reflexoes/': {
       id: '/_authenticated/reflexoes/'
       path: '/reflexoes'
@@ -381,6 +420,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAssistenteRoute: typeof AuthenticatedAssistenteRoute
   AuthenticatedCaminhoRoute: typeof AuthenticatedCaminhoRoute
   AuthenticatedContaRoute: typeof AuthenticatedContaRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
@@ -392,6 +432,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAulasIdRoute: typeof AuthenticatedAulasIdRoute
   AuthenticatedBibliaCatecismoRoute: typeof AuthenticatedBibliaCatecismoRoute
   AuthenticatedBibliaDestaquesRoute: typeof AuthenticatedBibliaDestaquesRoute
+  AuthenticatedBibliaPerguntarRoute: typeof AuthenticatedBibliaPerguntarRoute
   AuthenticatedReflexoesIdRoute: typeof AuthenticatedReflexoesIdRoute
   AuthenticatedAulasIndexRoute: typeof AuthenticatedAulasIndexRoute
   AuthenticatedBibliaIndexRoute: typeof AuthenticatedBibliaIndexRoute
@@ -399,6 +440,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAssistenteRoute: AuthenticatedAssistenteRoute,
   AuthenticatedCaminhoRoute: AuthenticatedCaminhoRoute,
   AuthenticatedContaRoute: AuthenticatedContaRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
@@ -410,6 +452,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAulasIdRoute: AuthenticatedAulasIdRoute,
   AuthenticatedBibliaCatecismoRoute: AuthenticatedBibliaCatecismoRoute,
   AuthenticatedBibliaDestaquesRoute: AuthenticatedBibliaDestaquesRoute,
+  AuthenticatedBibliaPerguntarRoute: AuthenticatedBibliaPerguntarRoute,
   AuthenticatedReflexoesIdRoute: AuthenticatedReflexoesIdRoute,
   AuthenticatedAulasIndexRoute: AuthenticatedAulasIndexRoute,
   AuthenticatedBibliaIndexRoute: AuthenticatedBibliaIndexRoute,

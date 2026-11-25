@@ -8,6 +8,7 @@ import {
   LogOut,
   MessageCircleHeart,
   Smartphone,
+  Sparkles,
   Users,
   X,
 } from "lucide-react";
@@ -111,6 +112,9 @@ function ContaPage() {
       <ListGroup className="mt-7">
         <Link to="/senha" className={rowClass}>
           <Row icon={KeyRound} title="Alterar senha" chevron />
+        </Link>
+        <Link to="/assistente" className={rowClass}>
+          <Row icon={Sparkles} title="Assistente de estudo" detail="chave e modelo" chevron />
         </Link>
         {me.data?.isOwner && (
           <Link to="/pessoas" className={rowClass}>

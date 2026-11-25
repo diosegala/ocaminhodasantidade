@@ -14,27 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      ai_usage: {
+      ai_conversations: {
         Row: {
           created_at: string
-          function_name: string
           id: string
-          tokens: number
+          title: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          function_name: string
           id?: string
-          tokens?: number
+          title?: string
           updated_at?: string
           user_id?: string
         }
         Update: {
           created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_settings: {
+        Row: {
+          created_at: string
+          key_hint: string | null
+          model: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          key_hint?: string | null
+          model?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          key_hint?: string | null
+          model?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage: {
+        Row: {
+          cache_read_tokens: number
+          created_at: string
+          function_name: string
+          id: string
+          input_tokens: number
+          model: string | null
+          output_tokens: number
+          tokens: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cache_read_tokens?: number
+          created_at?: string
+          function_name: string
+          id?: string
+          input_tokens?: number
+          model?: string | null
+          output_tokens?: number
+          tokens?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          cache_read_tokens?: number
+          created_at?: string
           function_name?: string
           id?: string
+          input_tokens?: number
+          model?: string | null
+          output_tokens?: number
           tokens?: number
           updated_at?: string
           user_id?: string
@@ -136,6 +231,7 @@ export type Database = {
       bible_verses: {
         Row: {
           book_id: number
+          busca: unknown
           chapter: number
           has_note: boolean
           id: number
@@ -565,6 +661,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_anthropic_key: {
+        Args: {
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      get_user_anthropic_key: {
+        Args: {
+          _user_id: string
+        }
+        Returns: string
+      }
+      set_user_anthropic_key: {
+        Args: {
+          _key: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       get_app_secret: {
         Args: {
           secret_name: string
